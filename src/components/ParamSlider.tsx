@@ -7,7 +7,6 @@ const ParamSlider: Component<{ storeInstance: string, par: string }> = props => 
   const store = useStore(props.storeInstance);
 
   const setParamValue = (v: number[]) => {
-    console.log("called")
     store.setParams(params => ({
       ...params,
       user: {
@@ -20,9 +19,9 @@ const ParamSlider: Component<{ storeInstance: string, par: string }> = props => 
   return (
     <Slider class="SliderRoot"
             minValue={1}
-            maxValue={6}
+            maxValue={10}
             step={0.01}
-            value={[store.params().user[props.par] as number || 2]}
+            value={[store.params().user[props.par] as number || 4]}
             onChange={setParamValue}>
       <div class="SliderLabel">
         <Slider.Label>{props.par}</Slider.Label>

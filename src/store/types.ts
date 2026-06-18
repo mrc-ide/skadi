@@ -1,5 +1,6 @@
 import { ContinuousGeneratorODE, DiscreteGenerator } from "@reside-ic/dust2"
 import { Lines, ScatterPoints } from "@reside-ic/skadi-chart"
+import { NamedResult } from "interfaces/System"
 import { Accessor, Setter } from "solid-js"
 
 type ModelMetadata = { name: string }
@@ -15,6 +16,8 @@ export type Model = {
 }
 
 export type Config = {
+  startTime: number,
+  endTime: number,
   particles: number,
   dt: number,
 }
@@ -26,8 +29,13 @@ export type Params = {
   user: ParameterValues,
 }
 
+export type GraphHtmlMetadata = {
+  id: string,
+} & Partial<GraphConfigNoId>
 export type HtmlMetadata = {
-  variables: string[]
+  graphMetadata: GraphHtmlMetadata[],
+  sync: (keyof GraphConfig)[],
+  allVars: string[],
 }
 
 export type Metadata = any
@@ -39,9 +47,19 @@ export type PlotData = {
 export type Form = Record<string, any>
 
 export type GraphData = {
-  main: PlotData,
-  static: PlotData[]
+  main: NamedResult,
+  static: NamedResult[]
 }
+
+export type Range = [number | null, number | null]
+export type GraphConfig = {
+  id: string,
+  vars: string[],
+  xRange: Range,
+  yRange: Range,
+  yLog: boolean,
+}
+export type GraphConfigNoId = Omit<GraphConfig, "id">
 
 
 export type Store = {
@@ -69,8 +87,20 @@ export type Store = {
   // v
 
   // updated when params update
-  graphData: Accessor<GraphData>
+  graphData: Accessor<GraphData>,
   setGraphData: Setter<GraphData>,
+
+
+  // graph groups contain graph configs which
+  // hold properties of graphs unrelated to the
+  // data like x range and they contain sync
+  // property that tracks what is synced between
+  // the configs
+  graphConfigs: Accessor<GraphConfig[]>,
+  setGraphConfig: (
+    id: string,
+    changedProp: Partial<GraphConfigNoId>
+  ) => void,
 }
 
 

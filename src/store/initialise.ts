@@ -1,8 +1,7 @@
 import { createEffect, createSignal, on } from "solid-js";
-import { Form, GraphData, HtmlMetadata, JsonDefinedFields, Params, PlotData, Store } from "./types";
+import { Form, GraphConfig, GraphConfigNoId, GraphData, GraphHtmlMetadata, HtmlMetadata, JsonDefinedFields, Params, Range, Store } from "./types";
 import { deepCopy, getJson, pushIfNotIn } from "./utils";
 import { System } from "@reside-ic/dust2";
-import { Point } from "@reside-ic/skadi-chart";
 
 export const getStoresInPage = () => {
   const stores = document.querySelectorAll("[data-w-store]")!;
@@ -44,47 +43,86 @@ export const readJsonForStores = async (
   }));
 };
 
-const getHtmlMetadata = (storeInstance: string): HtmlMetadata => {
-  document.querySelectorAll(`[data-w-store="${storeInstance}"]`)!;
-  return { variables: [] };
+const getHtmlMetadata = (
+  storeInstance: string,
+  modelMetadata: JsonDefinedFields["model"]["metadata"]
+): HtmlMetadata => {
+  const graphs = document.querySelectorAll(
+    `.w-plot[data-w-store="${storeInstance}"]`
+  );
+
+  const userDefinedIdToUuid: Record<string, string> = {};
+  const graphMetadata: GraphHtmlMetadata[] = [];
+  const sync: (keyof GraphConfig)[] = [];
+  let allVars: string[] = [];
+
+  graphs.forEach(g => {
+    const userDefinedId = g.getAttribute("w-id");
+    let uuid: string;
+    if (!userDefinedId) {
+      uuid = crypto.randomUUID();
+    } else {
+      userDefinedIdToUuid[userDefinedId] ??= crypto.randomUUID();
+      uuid = userDefinedIdToUuid[userDefinedId];
+    }
+    g.setAttribute("w-store-id", uuid);
+
+    const varsStr = g.getAttribute("w-vars");
+    const vars = varsStr?.split(",").map(s => s.trim());
+    if (vars) {
+      vars.forEach(v => pushIfNotIn(allVars, v));
+    } else {
+      allVars = modelMetadata.variables.map(v => v.name);
+    }
+
+    const xRangeStr = g.getAttribute("w-x-range");
+    const xRange = xRangeStr?.split(",").map(s => s ? Number(s) : null) as Range | undefined;
+
+    const yRangeStr = g.getAttribute("w-x-range");
+    const yRange = yRangeStr?.split(",").map(s => s ? Number(s) : null) as Range | undefined;
+
+    const yLogStr = g.getAttribute("w-y-log");
+    const yLog = yLogStr === "true";
+
+    if (!graphMetadata.find(g => g.id === uuid)) {
+      graphMetadata.push({
+        id: uuid, vars, xRange,
+        yRange, yLog
+      });
+    }
+
+    const syncsStr = g.getAttribute("w-sync");
+    const syncs = syncsStr?.split(",").map(s => s.trim());
+    if (syncs) syncs.forEach(s => pushIfNotIn(sync, s));
+  });
+
+  return { graphMetadata, sync, allVars };
 };
 
-const recalculateGraphData = (store: Store) => {
-  const params = store.params();
+const calculateGraphData = (fixed: Store["fixed"], params: Params) => {
+  const { startTime, endTime, particles, dt } = fixed.config;
   const sys = System.createODE(
-    store.fixed.model.generator as any,
+    fixed.model.generator as any,
     { ...params.static, ...params.user },
-    0,
-    store.fixed.config.dt || 0.01,
-    store.fixed.config.particles || 1,
+    startTime || 0,
+    dt || 0.01,
+    particles || 1,
   );
 
   sys.setStateInitial();
 
-  const dt = 15 / 500
-  const res = sys.simulateByStateVariableName(
-    Array.from({ length: 500 }).map((_, i) => i * dt)
+  const nPoints = 1000;
+  const timeStep = (endTime - startTime) / nPoints;
+  return sys.simulateByStateVariableName(
+    Array.from({ length: nPoints }).map((_, i) => i * timeStep),
+    fixed.htmlMetadata.allVars
   );
-  const vars = Object.keys(res.values[0]);
-  const lines = vars.map<PlotData["lines"][number]>(v => {
-    const points: Point[] = [];
-    for (let i = 0; i < res.times.length; i++) {
-      const x = res.times[i];
-      const y = res.values[0][v][i] as any as number;
-      points.push({ x, y });
-    }
-    return { points, style: {} };
-  });
-
-  store.setGraphData(graphData => ({
-    ...graphData,
-    main: { lines, points: [] }
-  }));
 };
 
 const addReactivity = (store: Store) => {
   createEffect(on(store.params, () => {
-    recalculateGraphData(store);
+    const main = calculateGraphData(store.fixed, store.params());
+    store.setGraphData(prev => ({ ...prev, main }));
   }, { defer: true }))
 };
 
@@ -92,22 +130,53 @@ export const getInitialisedStore = (
   storeInstance: string,
   jsonDefinedFields: JsonDefinedFields,
 ): Store => {
-  const fixed = {
+  const metadata: JsonDefinedFields["model"]["metadata"] =
+    deepCopy(jsonDefinedFields.model.metadata);
+  const fixed: Store["fixed"] = {
     config: deepCopy(jsonDefinedFields.config),
     staticParamSets: deepCopy(jsonDefinedFields.staticParamSets),
     model: {
       generator: eval(jsonDefinedFields.model.generator),
-      metadata: deepCopy(jsonDefinedFields.model.metadata),
+      metadata,
     },
-    htmlMetadata: getHtmlMetadata(storeInstance),
+    htmlMetadata: getHtmlMetadata(storeInstance, metadata),
   };
 
   const [form, setForm] = createSignal<Form>({});
   const [params, setParams] = createSignal<Params>({ user: {}, static: {} });
   const [graphData, setGraphData] = createSignal<GraphData>({
-    main: { lines: [], points: [] },
+    main: calculateGraphData(fixed, params()),
     static: []
   });
+  const [graphConfigs, setGraphConfigs] = createSignal<GraphConfig[]>(
+    fixed.htmlMetadata.graphMetadata.map(g => ({
+      id: g.id,
+      vars: g.vars ?? fixed.model.metadata.variables.map(v => v.name),
+      xRange: g.xRange ?? [fixed.config.startTime, fixed.config.endTime],
+      yRange: g.yRange ?? [null, null],
+      yLog: g.yLog ?? false
+    }))
+  );
+  const setGraphConfig = (id: string, changedProps: Partial<GraphConfigNoId>) => {
+    let newGraphConfigs = [...graphConfigs()];
+    const idx = newGraphConfigs.findIndex(g => g.id === id);
+    newGraphConfigs[idx] = {
+      ...newGraphConfigs[idx],
+      ...changedProps
+    };
+
+    const changedProperties = Object.keys(changedProps) as (keyof typeof changedProps)[];
+    const { sync } = fixed.htmlMetadata;
+    const propertiesToSync = changedProperties
+      .filter(k => sync.includes(k as keyof GraphConfig));
+    const changedSyncProps = Object.fromEntries(
+      propertiesToSync.map(k => [k, changedProps[k]])
+    );
+
+    newGraphConfigs = newGraphConfigs.map(g => ({...g, ...changedSyncProps}))
+
+    setGraphConfigs(newGraphConfigs);
+  };
 
   const store = {
     fixed,
@@ -117,6 +186,8 @@ export const getInitialisedStore = (
     setParams,
     graphData,
     setGraphData,
+    graphConfigs,
+    setGraphConfig
   };
 
   addReactivity(store);

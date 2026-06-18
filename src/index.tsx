@@ -25,9 +25,10 @@ const main = async () => {
     const els1 = document.querySelectorAll(`.w-plot[data-w-store="${storeInstance}"]`);
     els1.forEach(el => {
       el.innerHTML = "";
+      const id = el.getAttribute("w-store-id")!;
       render(() => (
         <StoreContext.Provider value={store}>
-          <Plot storeInstance={storeInstance}/>
+          <Plot storeInstance={storeInstance} id={id}/>
         </StoreContext.Provider>
       ), el)
     });

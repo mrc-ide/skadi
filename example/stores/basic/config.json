@@ -1,5 +1,6 @@
 {
-  "type": "continuous",
+  "startTime": 0,
+  "endTime": 15,
   "particles": 1,
   "dt": 0.01
 }
