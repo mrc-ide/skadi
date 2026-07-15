@@ -23,9 +23,7 @@ type TestFn = <T>(args: {
   eq?: Eq<T> | undefined
 }) => void
 
-const testWithAndWithoutEq = (
-  fn: TestFn
-) => {
+const testWithAndWithoutEq = (fn: TestFn) => {
   fn({
     getArr1: numArr1, getArr2: numArr2,
     el1: 1, el2: 2,

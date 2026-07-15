@@ -1,0 +1,14 @@
+name: Test
+on: [push]
+jobs:
+  Tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install deps
+        run: npm i
+
+      - name: Run tests
+        run: npm run test
