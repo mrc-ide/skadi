@@ -7,19 +7,82 @@
     <title>skadi</title>
   </head>
   <body>
-    <div data-w-store="basic"
-         class="w-par"
-         w-par="beta"></div>
-    <div data-w-store="basic"
-         class="w-plot"></div>
-    <div data-w-store="basic"
-         class="w-plot"
+    <!-- Config for basic store -->
+    <div class="w-store-cfg"
+         w-store="basic"
+         w-sync="yRange"></div>
+    
+    <div class="w-graph-cfg"
+         w-id="1"
+         w-store="basic"
          w-vars="R, I"></div>
-    <div data-w-store="basic:1"
-         class="w-par"
-         w-par="beta"></div>
-    <div data-w-store="basic:1"
-         class="w-plot"></div>
+
+    <div class="w-par-cfg"
+         w-store="basic"
+         w-par="beta"
+         w-val="4"
+         w-min="1"
+         w-max="6"
+         w-step="0.1"></div>
+
+    <div class="w-par-cfg"
+         w-store="basic"
+         w-par="sigma"
+         w-val="2"
+         w-min="0"
+         w-max="2.5"
+         w-step="0.1"></div>
+
+    <!-- Visual elements -->
+    <div class="w-par" w-store="basic" w-par="beta"></div>
+    <div class="w-par" w-store="basic" w-par="beta"></div>
+    <div class="w-par" w-store="basic" w-par="sigma"></div>
+
+    <div class="graph-container">
+      <div class="w-plot" w-id="1"></div>
+      <div class="w-plot" w-id="1"></div>
+      <div class="w-plot" w-store="basic" w-vars="S, I"></div>
+    </div>
+    
+
+
+
+
+    <div class="w-store-cfg"
+         w-store="basic:1"
+         w-sync="xRange, yRange"></div>
+    
+    <div class="w-graph-cfg"
+         w-id="2"
+         w-store="basic:1"
+         w-vars="I"></div>
+
+    <div class="w-par-cfg"
+         w-store="basic:1"
+         w-par="beta"
+         w-val="4"
+         w-min="1"
+         w-max="10"
+         w-step="0.1"></div>
+
+    <div class="w-par" w-store="basic:1" w-par="beta"></div>
+
+    <div class="graph-container">
+      <div class="w-plot" w-id="2"></div>
+      <div class="w-plot" w-id="2"></div>
+      <div class="w-plot" w-store="basic:1" w-vars="S, R"></div>
+    </div>
+
+
     <script type="module" src="/src/index.tsx"></script>
   </body>
+  <style>
+  .w-plot {
+    width: 33%;
+  }
+
+  .graph-container {
+    display: flex;
+  }
+  </style>
 </html>

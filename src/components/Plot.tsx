@@ -1,26 +1,28 @@
-import { Component, createEffect } from "solid-js";
+import { Component, createEffect, createSignal, on } from "solid-js";
 import { useStore } from "../store";
 import { Chart } from "@reside-ic/skadi-chart";
-import { PlotData } from "../store/types";
+import { PlotData, Range } from "../store/types";
 
-const Plot: Component<{ storeInstance: string, id: string }> = props => {
-  const store = useStore(props.storeInstance);
+type RangeObj = { xRange: Range, yRange: Range }
+const rangeToExtent = (obj: RangeObj) => ({
+  x: { start: obj.xRange[0], end: obj.xRange[1] },
+  y: { start: obj.yRange[0], end: obj.yRange[1] },
+})
+
+const Plot: Component<{ store: string, id: string }> = props => {
+  const store = useStore(props.store);
   let plot!: HTMLDivElement;
+  const [skadiChart, setSkadiChart] = createSignal<Chart<any>>();
+  const gState = store.getGraphState(props.id);
 
-  createEffect(() => {
-    const scales = {
-        x: { start: store.fixed.config.startTime, end: store.fixed.config.endTime }
-    };
+  const drawChart = () => {
+    const cfg = gState.config;
+    
     const data = store.graphData();
-    const config = store.graphConfigs().find(g => g.id === props.id)!;
-    const plotData: PlotData = {
-      lines: [], points: []
-    };
-
-    const times = data.main.times;
-    const { vars } = config;
-    vars.forEach(v => {
-      data.main.values.forEach(val => {
+    const plotData: PlotData = { lines: [], points: [] };
+    const times = data.main.data.times;
+    cfg.vars.forEach(v => {
+      data.main.data.values.forEach(val => {
         const line: PlotData["lines"][number] = { points: [], style: {} };
         for (let i = 0; i < times.length; i++) {
           const x = times[i];
@@ -31,16 +33,38 @@ const Plot: Component<{ storeInstance: string, id: string }> = props => {
       })
     });
 
-    new Chart()
+    const scales = rangeToExtent(cfg);
+    const maxScales = rangeToExtent(data.main);
+    const sChart = new Chart({ logScale: { y: cfg.yLog } })
       .addAxes()
       .addTraces(plotData.lines)
       .addGridLines()
       .addZoom()
-      .appendTo(plot, scales);
+      .addCustomLifecycleHooks({
+        beforeZoom: zoomProperties => {
+          store.setGraphConfig(props.id, {
+            xRange: zoomProperties.x,
+            yRange: zoomProperties.y,
+          });
+        }
+      })
+      .appendTo(plot, maxScales, scales)
+
+    setSkadiChart(sChart);
+  };
+
+  const handleZoom = () => skadiChart()!.handleZoom({
+    x: gState.config.xRange,
+    y: gState.config.yRange,
+    eventType: "brush",
   });
 
+  createEffect(on(gState.signals.fullRerender, drawChart));
+  createEffect(on(store.graphData, drawChart));
+  createEffect(on(gState.signals.rangeUpdated, handleZoom));
+
   return (
-    <div ref={plot} style={{ height: "600px" }}></div>
+    <div ref={plot} style={{ height: "300px" }}></div>
   );
 };
 

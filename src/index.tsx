@@ -4,35 +4,61 @@ import './index.css'
 import { getStores } from './store'
 import ParamSlider from './components/ParamSlider';
 import Plot from './components/Plot';
+import { objForEach } from './store/utils';
+import { getAttr, getEls } from './store/html/utils';
+import { JSX } from 'solid-js';
+import { validateHtml } from './store/html/validate';
+import Reactivity from './components/Reactivity';
+
+type RenderFunc = (el: Element, getJsx: () => JSX.Element) => void
+
+const renderParamSliderEls = (store: string, renderWithStore: RenderFunc) => {
+  const els = getEls("par", { store });
+  return els.forEach(el => {
+    const props = {
+      store,
+      par: getAttr("par", el)!
+    };
+    renderWithStore(el, () => <ParamSlider {...props}/>);
+  });
+}
+
+const renderReactivityEls = (store: string, renderWithStore: RenderFunc) => {
+  const el = document.createElement("div");
+  document.body.append(el);
+  const props = { store };
+  renderWithStore(el, () => <Reactivity {...props}/>);
+}
+
+const renderPlotEls = (store: string, renderWithStore: RenderFunc) => {
+  const els = getEls("plot", { store });
+  return els.map(el =>  {
+   const props = {
+      store,
+      id: getAttr("storeid", el)!,
+    };
+    renderWithStore(el, () => <Plot {...props}/>)
+  })
+};
 
 const main = async () => {
-  const stores = await getStores();
-  Object.entries(stores).forEach(([storeInstance, { store, StoreContext }]) => {
-    const els = document.querySelectorAll(`.w-par[data-w-store="${storeInstance}"]`);
-    els.forEach(el => {
-      el.innerHTML = "";
-      let par = "";
-      for (let i = 0; i < el.attributes.length; i++) {
-        const attr = el.attributes[i];
-        if (attr.nodeName === "w-par") par = attr.nodeValue!;
-      }
-      render(() => (
-        <StoreContext.Provider value={store}>
-          <ParamSlider storeInstance={storeInstance} par={par}/>
-        </StoreContext.Provider>
-      ), el)
-    });
-    const els1 = document.querySelectorAll(`.w-plot[data-w-store="${storeInstance}"]`);
-    els1.forEach(el => {
-      el.innerHTML = "";
-      const id = el.getAttribute("w-store-id")!;
-      render(() => (
-        <StoreContext.Provider value={store}>
-          <Plot storeInstance={storeInstance} id={id}/>
-        </StoreContext.Provider>
-      ), el)
-    });
-  });
+  validateHtml();
+  objForEach(
+    await getStores(),
+    (store, StoreProvider) => {
+      const renderWithStore = (el: Element, getJsx: () => JSX.Element) => {
+        el.innerHTML = "";
+        render(() => (
+          <StoreProvider>
+            {getJsx()}
+          </StoreProvider>
+        ), el);
+      };
+      renderParamSliderEls(store, renderWithStore);
+      renderPlotEls(store, renderWithStore);
+      renderReactivityEls(store, renderWithStore);
+    }
+  );
 };
 
 main();

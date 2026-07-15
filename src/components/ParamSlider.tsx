@@ -3,25 +3,26 @@ import { Component } from "solid-js";
 import { useStore } from "../store";
 import "./style.css"
 
-const ParamSlider: Component<{ storeInstance: string, par: string }> = props => {
-  const store = useStore(props.storeInstance);
+export type ParamsProps = {
+  store: string,
+  par: string,
+}
+
+const ParamSlider: Component<ParamsProps> = props => {
+  const store = useStore(props.store);
+  const { min, max, step } = store.fixed.html.pars[props.par];
 
   const setParamValue = (v: number[]) => {
-    store.setParams(params => ({
-      ...params,
-      user: {
-        ...params.user,
-        [props.par]: v[0]
-      }
-    }));
+    if (store.params().user[props.par] === v[0]) return;
+    store.setParams(params => params.user[props.par] = v[0]);
   };
 
   return (
     <Slider class="SliderRoot"
-            minValue={1}
-            maxValue={10}
-            step={0.01}
-            value={[store.params().user[props.par] as number || 4]}
+            minValue={min}
+            maxValue={max}
+            step={step || ((max - min) / 1000)}
+            value={[store.params().user[props.par] as number]}
             onChange={setParamValue}>
       <div class="SliderLabel">
         <Slider.Label>{props.par}</Slider.Label>

@@ -39,8 +39,8 @@ const main = async () => {
     );
 
     fs.cpSync(
-      path.resolve(storePath, "fixedParameterSets.json"),
-      path.resolve(destStorePath, "fixedParameterSets.json")
+      path.resolve(storePath, "fixedParamSets.json"),
+      path.resolve(destStorePath, "fixedParamSets.json")
     );
 
     const model = fs.readFileSync(path.resolve(storesPath, store, "model.R"))

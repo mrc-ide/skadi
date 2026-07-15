@@ -3,23 +3,22 @@ import { Lines, ScatterPoints } from "@reside-ic/skadi-chart"
 import { NamedResult } from "interfaces/System"
 import { Accessor, Setter } from "solid-js"
 
-type ModelMetadata = { name: string }
-
-export type Model = {
-  generator: DiscreteGenerator<any, any, any> | ContinuousGeneratorODE<any, any, any>,
-  metadata: {
-    time: "discrete" | "continuous",
-    variables: ModelMetadata[],
-    parameters: ModelMetadata[],
-    data: ModelMetadata[],
-  },
+export type ModelInfo = { name: string }
+export type ModelMetadata = {
+  time: "discrete" | "continuous",
+  variables: ModelInfo[],
+  parameters: ModelInfo[],
+  data: ModelInfo[],
 }
+export type Generator =
+  | DiscreteGenerator<any, any, any>
+  | ContinuousGeneratorODE<any, any, any>
 
 export type Config = {
-  startTime: number,
+  startTime?: number,
   endTime: number,
   particles: number,
-  dt: number,
+  dt?: number,
 }
 
 export type ParameterValue = number | number[]
@@ -30,12 +29,27 @@ export type Params = {
 }
 
 export type GraphHtmlMetadata = {
-  id: string,
-} & Partial<GraphConfigNoId>
+  id: string, config: Partial<GraphConfig>
+}
+export type ParamsConfig = {
+  val: number,
+  min: number,
+  max: number,
+  step?: number | undefined
+}
 export type HtmlMetadata = {
   graphMetadata: GraphHtmlMetadata[],
   sync: (keyof GraphConfig)[],
-  allVars: string[],
+  vars: string[],
+  pars: Record<string, ParamsConfig>,
+}
+
+export type FixedParamSet = Partial<Params>[]
+
+export type FixedJson = {
+  config: Config,
+  fixedParamSets: FixedParamSet,
+  modelMetadata: ModelMetadata,
 }
 
 export type Metadata = any
@@ -46,30 +60,62 @@ export type PlotData = {
 
 export type Form = Record<string, any>
 
+export type Range = [number, number]
+export type DataWithRange = {
+  data: NamedResult,
+  xRange: Range,
+  yRange: Range,
+}
 export type GraphData = {
-  main: NamedResult,
-  static: NamedResult[]
+  main: DataWithRange,
+  static: DataWithRange[]
 }
 
-export type Range = [number | null, number | null]
 export type GraphConfig = {
-  id: string,
   vars: string[],
   xRange: Range,
   yRange: Range,
   yLog: boolean,
 }
-export type GraphConfigNoId = Omit<GraphConfig, "id">
+export const graphConfigKeys = [
+  "vars", "xRange", "yRange", "yLog"
+] as const satisfies (keyof GraphConfig)[];
 
+export type LowercaseArray<T extends string[]> =
+  T extends [infer First extends string, ...infer Rest extends string []]
+    ? [Lowercase<First>, ...LowercaseArray<Rest>]
+    : []
+
+export const graphConfigAttrs =
+  graphConfigKeys.map(x => x.toLowerCase()) as LowercaseArray<typeof graphConfigKeys>;
+
+export type GraphState = {
+  id: string,
+  config: GraphConfig,
+  signals: {
+    fullRerender: Accessor<boolean>,
+    setFullRerender: Setter<boolean>,
+    rangeUpdated: Accessor<boolean>,
+    setRangeUpdated: Setter<boolean>,
+  },
+}
+
+type ExcludeSet<K extends string> = K extends `set${infer _}` ? never : K
+export type GraphSignal = keyof {
+  [K in keyof GraphState["signals"] as ExcludeSet<K>]: any
+}
+
+export type Fixed = {
+  json: FixedJson,
+  generator: Generator,
+  html: HtmlMetadata,
+}
+
+export type ProduceParam = (p: Params) => void
 
 export type Store = {
   // will be initialised once at the start
-  fixed: {
-    model: Model,
-    config: Config,
-    staticParamSets: Partial<Params>[],
-    htmlMetadata: HtmlMetadata,
-  }
+  fixed: Fixed,
 
 
   // updated via user form if any
@@ -81,7 +127,7 @@ export type Store = {
 
   // updated when form or user input updates
   params: Accessor<Params>,
-  setParams: Setter<Params>,
+  setParams: (fn: ProduceParam) => void,
 
   // |
   // v
@@ -91,22 +137,24 @@ export type Store = {
   setGraphData: Setter<GraphData>,
 
 
-  // graph groups contain graph configs which
-  // hold properties of graphs unrelated to the
-  // data like x range and they contain sync
-  // property that tracks what is synced between
-  // the configs
-  graphConfigs: Accessor<GraphConfig[]>,
+  graphStates: GraphState[],
+  getGraphState: (
+    id: string,
+  ) => GraphState,
   setGraphConfig: (
     id: string,
-    changedProp: Partial<GraphConfigNoId>
+    changedProps: Partial<GraphConfig>,
+    rangeUpdated?: boolean,
   ) => void,
 }
 
 
 // we get model as a string that we have to eval
-export type JsonDefinedFields = {
-  model: Omit<Model, "generator"> & { generator: string },
+export type JsonPayload = {
+  model: {
+    generator: string,
+    metadata: ModelMetadata,
+  },
   config: Config,
-  staticParamSets: Partial<Params>[],
+  fixedParamSets: FixedParamSet[],
 }

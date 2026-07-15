@@ -1,34 +1,43 @@
-import { Context, createContext, useContext } from "solid-js";
-import { getInitialisedStore, getStoresInPage, readJsonForStores } from "./initialise";
+import { Context, createContext, ParentProps, useContext } from "solid-js";
+import { getInitialisedStore } from "./initialise";
 import { Store } from "./types";
+import { getStoresInPage } from "./html/metadata";
+import { readJsonForStores } from "./json";
+import { objFromVals, unique } from "./utils";
+import { validateVars } from "./html/validate";
 
-export const storeContexts: Record<
-  string,
-  Context<Store | undefined>
-> = {};
+export const storeContexts: Record<string, Context<Store>> = {};
+const getStoreType = (s: string) => s.split(":")[0];
 
 export const getStores = async () => {
-  const { storeInstancesInPage, storeNamesInPage } = getStoresInPage();
-  const storeElementsFromJson = await readJsonForStores(storeNamesInPage);
+  const stores = getStoresInPage();
+  const storeTypes = unique(stores.map(getStoreType));
+  const jsonPayloads = await readJsonForStores(storeTypes);
 
-  return Object.fromEntries(storeInstancesInPage.map(storeInstance => {
-    const storeName = storeInstance.split(":")[0];
-    const StoreContext = createContext<Store>();
-    storeContexts[storeInstance] = StoreContext;
+  return objFromVals(
+    stores,
+    s => {
+      const jsonPayload = jsonPayloads[getStoreType(s)];
 
-    const store = getInitialisedStore(
-      storeInstance,
-      storeElementsFromJson[storeName]
-    );
+      const modelVars = jsonPayload.model.metadata.variables.map(v => v.name);
+      validateVars(s, modelVars);
 
-    return [storeInstance, { StoreContext, store }];
-  }));
+      const store = getInitialisedStore(s, jsonPayload);
+
+      const StoreContext = createContext<Store>(store);
+      storeContexts[s] = StoreContext;
+
+      return (props: ParentProps) => (
+        <StoreContext.Provider value={store}>
+          {props.children}
+        </StoreContext.Provider>
+      );
+    }
+  );
 };
 
-export const useStore = (storeInstance: string) => {
-  const store = useContext(storeContexts[storeInstance]);
-  if (!store) {
-    throw new Error("store context not defined");
-  }
+export const useStore = (storeName: string) => {
+  const store = useContext(storeContexts[storeName]);
+  if (!store) throw new Error("store context not defined");
   return store;
 };
