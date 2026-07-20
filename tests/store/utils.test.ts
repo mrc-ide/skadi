@@ -23,6 +23,10 @@ type TestFn = <T>(args: {
   eq?: Eq<T> | undefined
 }) => void
 
+// Some array functions expose an eq arg that let's us define equality
+// for example obj1 and obj2 are equal if their `id` fields are equal.
+// This test helper reduced code duplication by executing test logic with
+// both numbers and then objects
 const testWithAndWithoutEq = (fn: TestFn) => {
   fn({
     getArr1: numArr1, getArr2: numArr2,
@@ -140,9 +144,9 @@ describe("object utils", () => {
   test("objMap", () => {
     expect(objMap(
       obj1,
-      (_, v) => v * 10
+      (k, v) => `${k}${v * 10}`
     )).toStrictEqual({
-      a: 20, b: 30
+      a: "a20", b: "b30"
     });
   });
 
