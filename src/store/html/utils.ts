@@ -29,7 +29,7 @@ export type Attr =
   | "step"
   | "error"
 
-  // helper function to add `w-`
+// helper function to add `w-`
 export const w = (x: ClassName | Attr) => `w-${x}`;
 
 const makeQuery = (
