@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@kobalte/core": "^0.13.11",
-    "@reside-ic/dust2": "file:../dust2-js/",
+    "@reside-ic/dust2": "^1.2.0",
     "@reside-ic/skadi-chart": "^1.1.16",
     "docopt": "^0.6.2",
     "solid-js": "^1.9.12"
