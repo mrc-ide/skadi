@@ -4,7 +4,6 @@ import { attrEq, attrsEq, error, expectAttrFn, expectAttrs, expectAttrsFn, expec
 describe("html utils", () => {
   beforeEach(() => {
     const el = document.createElement("div");
-    el.setAttribute("id", "test");
     el.innerHTML = `
       <div class="w-par-cfg"
            w-store="basic"
