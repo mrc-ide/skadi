@@ -1,27 +1,24 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { attrEq, attrsEq, error, expectAttrFn, expectAttrs, expectAttrsFn, expectOneOfAttrs, getAttr, getEl, getEls, isStrNumber, setAttr, splitComma, w } from "../../../src/store/html/utils";
+import { htmlAppend, htmlClear } from "./helpers";
 
 describe("html utils", () => {
-  beforeEach(() => {
-    const el = document.createElement("div");
-    el.innerHTML = `
-      <div class="w-par-cfg"
-           w-store="basic"
-           w-par="sigma"
-           w-val="2"
-           w-min="1"
-           w-max="3"
-           w-step="0.1"></div>
+  beforeEach(() => htmlAppend(`
+    <div class="w-par-cfg"
+         w-store="basic"
+         w-par="sigma"
+         w-val="2"
+         w-min="1"
+         w-max="3"
+         w-step="0.1"></div>
 
-      <div class="w-par" w-store="basic" w-par="beta"></div>
-      <div class="w-par" w-store="basic" w-par="beta"></div>
-      <div class="w-par" w-store="basic:1" w-par="sigma"></div>
-      <div class="w-plot" w-store="basic" w-vars="S, I"></div>
-    `;
-    document.body.append(el);
-  });
+    <div class="w-par" w-store="basic" w-par="beta"></div>
+    <div class="w-par" w-store="basic" w-par="beta"></div>
+    <div class="w-par" w-store="basic:1" w-par="sigma"></div>
+    <div class="w-plot" w-store="basic" w-vars="S, I"></div>
+  `));
 
-  afterEach(() => document.body.innerHTML = "");
+  afterEach(htmlClear);
 
   test("getAttr", () => {
     const el = document.createElement("div");

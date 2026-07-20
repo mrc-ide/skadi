@@ -1,3 +1,4 @@
+import { expect } from "vitest";
 import { FixedJson, GraphConfig, graphConfigAttrs, graphConfigKeys, GraphHtmlMetadata, HtmlMetadata, Range } from "../types";
 import { addIfNotIn, concatIfNotIn, objFrom, objFromVals, objMapStatic } from "../utils";
 import { getAttr, getEl, getEls, setAttr, splitComma, w } from "./utils";
@@ -65,7 +66,7 @@ export const getHtmlMetadata = (
   const allVars = fixedJson.modelMetadata.variables.map(v => v.name);
   // aggregate over all vars but if left blank, default to all vars of the model
   const vars = graphEls.reduce((v, el) => {
-    const currVars = splitComma(getAttr("sync", el));
+    const currVars = splitComma(getAttr("vars", el));
     return currVars ? concatIfNotIn(v, currVars) : allVars;
   }, [] as string[]);
 

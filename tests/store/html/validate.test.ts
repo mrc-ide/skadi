@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { validateHtml, validateVars } from "../../../src/store/html/validate";
+import { htmlAppend, htmlClear } from "./helpers";
 
 type Test = { html: string }
   & ({} | { errMsg: string })
@@ -7,14 +8,6 @@ type Tests = Test[]
 
 type VarTest = Test & { vars: string[] }
 type VarTests = VarTest[]
-
-const htmlAppend = (html: string) => {
-    const el = document.createElement("div");
-    el.innerHTML = html;
-    document.body.append(el);
-}
-
-const htmlClear = () => document.body.innerHTML = "";
 
 const runValidateHtmlTests = (tests: Tests) => {
   tests.forEach(t => {
