@@ -47,10 +47,7 @@ const get1GraphConfig = () => [
 ];
 
 const get2GraphConfigs = () => [
-  {
-    id: "1",
-    config: { vars: ["S", "I"] }
-  },
+  ...get1GraphConfig(),
   {
     id: "2",
     config: { vars: ["R", "I"] }
