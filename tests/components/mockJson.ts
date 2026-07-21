@@ -1,0 +1,27 @@
+export const config = {
+  startTime: 0,
+  endTime: 15,
+  particles: 1,
+  dt: 0.02
+};
+
+export const fixedParamSets = [];
+
+export const model = {
+  generator: "const odin_system = {\n  buildParams(imports, params) {\n    const dim = imports.array.getDimObj();\n    const odin = {};\n    const N = imports.io.readReal(params, \"N\", 1e+06);\n    const I0 = imports.io.readReal(params, \"I0\", 1);\n    const beta = imports.io.readReal(params, \"beta\", 4);\n    const sigma = imports.io.readReal(params, \"sigma\", 2);\n    const shape = new Map([\n      [\"S\", []],\n      [\"I\", []],\n      [\"R\", []]\n    ]);\n    odin.packing = new imports.Packer({ shape });\n    params.N = N;\n    params.I0 = I0;\n    params.beta = beta;\n    params.sigma = sigma;\n    return { ...params, dim, odin };\n  },\n  buildInternal(imports, params) {\n    return {};\n  },\n  initial(imports, time, params, internal, state) {\n    state[0] = params.N - params.I0;\n    state[1] = params.I0;\n    state[2] = 0;\n  },\n  rhs(imports, params, internal, time, state, stateDeriv) {\n    const unpacked = params.odin.packing.unpackArray(state);\n    const S = unpacked.get('S');\n    const I = unpacked.get('I');\n    stateDeriv[0] = -params.beta * S * I / params.N;\n    stateDeriv[1] = params.beta * S * I / params.N - params.sigma * I;\n    stateDeriv[2] = params.sigma * I;\n  },\n};\nodin_system;",
+  metadata: {
+    time: "continuous",
+    variables: [
+      { name: "S" },
+      { name :"I" },
+      { name: "R" }
+    ],
+    parameters: [
+      { name: "N" },
+      { name: "I0" },
+      { name: "beta" },
+      { name: "sigma" }
+    ],
+    data: []
+  }
+};
