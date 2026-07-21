@@ -1,6 +1,5 @@
-import { ContinuousGeneratorODE, DiscreteGenerator } from "@reside-ic/dust2"
+import { ContinuousGeneratorODE, DiscreteGenerator, NamedResult } from "@reside-ic/dust2"
 import { Lines, ScatterPoints } from "@reside-ic/skadi-chart"
-import { NamedResult } from "interfaces/System"
 import { Accessor, Setter } from "solid-js"
 
 export type ModelInfo = { name: string }

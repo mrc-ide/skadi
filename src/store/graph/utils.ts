@@ -1,4 +1,4 @@
-import { NamedResult } from "interfaces/System";
+import { NamedResult } from "@reside-ic/dust2";
 import { Range } from "../types";
 
 export const getXYRanges = (dat: NamedResult, vars: string[]) => {

@@ -14,15 +14,16 @@ const getGraphRanges = (dat: DataWithRange, vars: string[], fixed: Fixed) => {
       ? { xRange, yRange }
       : getXYRanges(data, vars);
 
+    // endTime is not optional in the config
     ranges.xRange = [
       json.config.startTime ?? ranges.xRange[0],
-      json.config.endTime ?? ranges.xRange[1]
+      json.config.endTime
     ] as Range;
 
     return ranges;
 };
 
-export const createGraphStates = (
+const createGraphStates = (
   fixed: Fixed,
   graphData: DataWithRange,
 ) => {
@@ -48,9 +49,11 @@ export const createGraphStates = (
   });
 };
 
-export const findGraphState = (graphStates: GraphState[], id: string) =>
+const findGraphState = (graphStates: GraphState[], id: string) =>
   graphStates.find(g => g.id === id)!;
 
+// TODO: need some mechanism of saying full rerender for all graphs or just
+// this graph
 const triggerGraphUpdate = (id: string, graphStates: GraphState[], type: GraphSignal) => {
   if (type === "fullRerender") {
     const gState = graphStates.find(g => g.id === id)!;
@@ -66,6 +69,10 @@ export const getGraphStateStore = (fixed: Fixed, graphData: GraphData) => {
 
   const getGraphState = (id: string) => findGraphState(graphStates, id);
 
+  // TODO: changed props can only be of certain types, not as general as
+  // partial graph config, e.g. we can't have an update with ranges and
+  // y log at the same time, make this discriminated union and maybe use
+  // that to do triggers
   const setGraphConfig = (
     id: string,
     changedProps: Partial<GraphConfig>,
