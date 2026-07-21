@@ -5,6 +5,10 @@ import { getStores, storeContexts } from "../../src/store/index.tsx";
 import { JSX, useContext } from "solid-js";
 import { render } from "@solidjs/testing-library";
 
+// this extends vitest test and performs the necessary bootstrapping for
+// component testing. it adds html to the page and mocks out the json
+// requests both of which are used to derive the store. it also attaches
+// spies to necessary bits of the store.
 export const test = baseTest
   .extend("component", async ({}, { onCleanup }) => {
     const oldFetch = globalThis.fetch;
