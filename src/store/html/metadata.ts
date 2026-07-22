@@ -1,4 +1,3 @@
-import { expect } from "vitest";
 import { FixedJson, GraphConfig, graphConfigAttrs, graphConfigKeys, GraphHtmlMetadata, HtmlMetadata, Range } from "../types";
 import { addIfNotIn, concatIfNotIn, objFrom, objFromVals, objMapStatic } from "../utils";
 import { getAttr, getEl, getEls, setAttr, splitComma, w } from "./utils";
