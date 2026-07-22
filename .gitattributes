@@ -1,1 +1,1 @@
-example/build/ linguist-generated
+example/build/**/* linguist-generated
