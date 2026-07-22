@@ -1,7 +1,7 @@
 import { Slider } from "@kobalte/core/slider";
 import { Component } from "solid-js";
 import { useStore } from "../store";
-import "./style.css"
+import "./paramSlider.css"
 
 export type ParamsProps = {
   store: string,

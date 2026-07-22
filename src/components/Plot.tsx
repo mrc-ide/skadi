@@ -2,6 +2,7 @@ import { Component, createEffect, createSignal, on } from "solid-js";
 import { useStore } from "../store";
 import { Chart } from "@reside-ic/skadi-chart";
 import { PlotData, Range } from "../store/types";
+import { strokeToStrokeDashArray } from "./utils";
 
 type RangeObj = { xRange: Range, yRange: Range }
 const rangeToExtent = (obj: RangeObj) => ({
@@ -24,11 +25,23 @@ const Plot: Component<{ store: string, id: string }> = props => {
     cfg.vars.forEach(v => {
       data.main.data.values.forEach(val => {
         const line: PlotData["lines"][number] = { points: [], style: {} };
+        
+        // data
         for (let i = 0; i < times.length; i++) {
           const x = times[i];
           const y = val[v][i] as number;
           line.points.push({ x, y });
         }
+
+        // styles
+        const { styles } = store.fixed.json.config;
+        if (styles && v in styles) {
+          const style = styles[v];
+          line.style.strokeColor = style.color;
+          line.style.strokeWidth = style.width;
+          line.style.strokeDasharray = style.stroke && strokeToStrokeDashArray[style.stroke];
+        }
+
         plotData.lines.push(line);
       })
     });

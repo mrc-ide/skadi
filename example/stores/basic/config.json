@@ -2,5 +2,22 @@
   "startTime": 0,
   "endTime": 15,
   "particles": 1,
-  "dt": 0.02
+  "dt": 0.02,
+  "styles": {
+    "S": {
+      "color": "red",
+      "width": 2,
+      "stroke": "dot"
+    },
+    "I": {
+      "color": "orange",
+      "width": 2,
+      "stroke": "dash"
+    },
+    "R": {
+      "color": "blue",
+      "width": 1,
+      "stroke": "dotdash"
+    }
+  }
 }

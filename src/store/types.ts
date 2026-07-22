@@ -13,11 +13,22 @@ export type Generator =
   | DiscreteGenerator<any, any, any>
   | ContinuousGeneratorODE<any, any, any>
 
+export type Stroke =
+  | "solid"
+  | "dot"
+  | "dash"
+  | "dotdash"
+export type LineStyle = {
+  color?: string,
+  width?: number,
+  stroke?: Stroke,
+}
 export type Config = {
   startTime?: number,
   endTime: number,
   particles: number,
   dt?: number,
+  styles?: Record<string, LineStyle>
 }
 
 export type ParameterValue = number | number[]
