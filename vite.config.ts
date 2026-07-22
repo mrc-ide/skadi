@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import solid from 'vite-plugin-solid'
 
 export default defineConfig({
@@ -12,5 +12,10 @@ export default defineConfig({
   },
   server: {
     open: "./example/build/index.html"
+  },
+  test: {
+    include: [
+      "tests/**/*.test.ts"
+    ]
   }
 })

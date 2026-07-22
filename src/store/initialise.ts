@@ -18,7 +18,8 @@ export const getInitialisedStore = (
 
   const fixed: Fixed = {
     json: fixedJson,
-    generator: eval(jsonPayload.model.generator),
+    // see https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
+    generator: (0, eval)(jsonPayload.model.generator),
     html: getHtmlMetadata(storeName, fixedJson),
   };
 
