@@ -4,7 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx tsx ./src/builder/builder.ts ./example/ && vite",
+    "dev": "tsx ./src/builder/builder.ts ./example/ && vite",
+    "dev-no-build": "vite",
     "build": "tsc -b && vite build",
     "test:unit": "vitest",
     "test:e2e": "playwright test"
