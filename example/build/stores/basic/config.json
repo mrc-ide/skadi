@@ -6,18 +6,15 @@
   "styles": {
     "S": {
       "color": "red",
-      "width": 2,
-      "stroke": "dot"
+      "width": 2
     },
     "I": {
       "color": "orange",
-      "width": 2,
-      "stroke": "dash"
+      "width": 2
     },
     "R": {
       "color": "blue",
-      "width": 1,
-      "stroke": "dotdash"
+      "width": 1
     }
   }
 }

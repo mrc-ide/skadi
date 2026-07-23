@@ -54,11 +54,13 @@ export type HtmlMetadata = {
   pars: Record<string, ParamsConfig>,
 }
 
-export type FixedParamSet = Partial<Params>[]
+export type FixedParamSet = Partial<Params> & {
+  style?: LineStyle
+}
 
 export type FixedJson = {
   config: Config,
-  fixedParamSets: FixedParamSet,
+  fixedParamSets: FixedParamSet[],
   modelMetadata: ModelMetadata,
 }
 
