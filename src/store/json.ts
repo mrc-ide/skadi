@@ -1,7 +1,7 @@
 import { JsonPayload } from "./types";
 import { iterate, objFromVals } from "./utils";
 
-const getJson = async <T>(storeName: string, fileName: string): Promise<T> => {
+export const getJson = async <T>(storeName: string, fileName: string): Promise<T> => {
   const res = await fetch(`./stores/${storeName}/${fileName}.json`);
   return await res.json();
 };
@@ -9,7 +9,7 @@ const getJson = async <T>(storeName: string, fileName: string): Promise<T> => {
 export const readJsonForStores = async (
   storeTypes: readonly string[]
 ): Promise<Record<string, JsonPayload>> => {
-  const jsonFiles = ["config", "model", "fixedParamSets"] as const;
+  const jsonFiles = ["config", "model", "fixedParamSets", "forms"] as const;
   const pArr: Promise<any>[][] = Array.from({ length: jsonFiles.length })
     .map(() => []);
 

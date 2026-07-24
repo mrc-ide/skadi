@@ -54,6 +54,7 @@ const Plot: Component<{ store: string, id: string }> = props => {
           });
         }
       })
+      .makeResponsive()
       .appendTo(plot, maxScales, scales)
 
     setSkadiChart(sChart);
@@ -65,9 +66,9 @@ const Plot: Component<{ store: string, id: string }> = props => {
     eventType: "brush",
   });
 
-  createEffect(on(gState.signals.fullRerender, drawChart));
-  createEffect(on(store.graphData, drawChart));
-  createEffect(on(gState.signals.rangeUpdated, handleZoom));
+  createEffect(on(gState.signals.fullRerender, drawChart, { defer: true }));
+  createEffect(on(store.graphData, drawChart, { defer: true }));
+  createEffect(on(gState.signals.rangeUpdated, handleZoom, { defer: true }));
 
   return (
     <div ref={plot} style={{ height: "300px" }}></div>

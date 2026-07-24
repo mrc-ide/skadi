@@ -43,6 +43,17 @@ const main = async () => {
       path.resolve(destStorePath, "fixedParamSets.json")
     );
 
+    fs.cpSync(
+      path.resolve(storePath, "forms.json"),
+      path.resolve(destStorePath, "forms.json")
+    );
+    
+    fs.cpSync(
+      path.resolve(storePath, "formAssets"),
+      path.resolve(destStorePath, "formAssets"),
+      { recursive: true }
+    );
+
     const model = fs.readFileSync(path.resolve(storesPath, store, "model.R"))
       .toString()
       .split("\n");

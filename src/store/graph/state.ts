@@ -3,7 +3,7 @@ import { DataWithRange, Fixed, GraphConfig, graphConfigKeys, GraphData, GraphSig
 import { getXYRanges } from "./utils";
 import { objAssignIfTruthy, objFilter, objKeys, objMergeAndAssignKey } from "../utils";
 
-const getGraphRanges = (dat: DataWithRange, vars: string[], fixed: Fixed) => {
+export const getGraphRanges = (dat: DataWithRange, vars: string[], fixed: Fixed) => {
     const { json, html } = fixed;
     const { xRange, yRange, data } = dat;
 
