@@ -1,10 +1,11 @@
 import { createSignal } from "solid-js";
 import { Fixed, FixedJson, Form, JsonPayload, Store } from "./types";
-import { deepCopy } from "./utils";
+import { deepCopy, objFrom } from "./utils";
 import { getHtmlMetadata } from "./html/metadata";
 import { getGraphDataStore } from "./graph/data";
 import { getGraphStateStore } from "./graph/state";
 import { getParamsStore } from "./params/state";
+import { getFormsStore } from "./forms/state";
 
 export const getInitialisedStore = (
   storeName: string,
@@ -14,6 +15,7 @@ export const getInitialisedStore = (
     config: deepCopy(jsonPayload.config),
     modelMetadata: deepCopy(jsonPayload.model.metadata),
     fixedParamSets: deepCopy(jsonPayload.fixedParamSets),
+    forms: deepCopy(jsonPayload.forms),
   };
 
   const fixed: Fixed = {
@@ -23,16 +25,15 @@ export const getInitialisedStore = (
     html: getHtmlMetadata(storeName, fixedJson),
   };
 
-  const [form, setForm] = createSignal<Form>({});
 
+  const formsStore = getFormsStore(fixed);
   const paramsStore = getParamsStore(fixed);
   const graphDataStore = getGraphDataStore(fixed, paramsStore.params());
   const graphStateStore = getGraphStateStore(fixed, graphDataStore.graphData());
 
   const store: Store = {
     fixed,
-    form,
-    setForm,
+    ...formsStore,
     ...paramsStore,
     ...graphDataStore,
     ...graphStateStore,

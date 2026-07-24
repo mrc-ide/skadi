@@ -10,6 +10,7 @@ export type ClassName =
   | "par-cfg"
   | "par"
   | "plot"
+  | "form"
 
 // these refer to attributes of elements in the document, actual attributes
 // are prefixed with `w-`, e.g. `w-store`
@@ -28,6 +29,7 @@ export type Attr =
   | "max"
   | "step"
   | "error"
+  | "formid"
 
 // helper function to add `w-`
 export const w = (x: ClassName | Attr) => `w-${x}`;

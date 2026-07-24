@@ -58,10 +58,23 @@ export type FixedParamSet = Partial<Params> & {
   style?: LineStyle
 }
 
+export type IdLabel = { id: string, label: string }
+export type FormField = {
+  label: string,
+  options: IdLabel[],
+  default: string,
+}
+export type FormConfig = {
+  id: string,
+  fields: FormField[]
+}
+export type FormsConfig = FormConfig[]
+
 export type FixedJson = {
   config: Config,
   fixedParamSets: FixedParamSet[],
   modelMetadata: ModelMetadata,
+  forms: FormsConfig,
 }
 
 export type Metadata = any
@@ -70,7 +83,7 @@ export type PlotData = {
   points: ScatterPoints<Metadata>,
 }
 
-export type Form = Record<string, any>
+export type Form = Record<string, IdLabel>
 
 export type Range = [number, number]
 export type DataWithRange = {
@@ -123,7 +136,7 @@ export type Fixed = {
   html: HtmlMetadata,
 }
 
-export type ProduceParam = (p: Params) => void
+export type Producer<T> = (fn: (x: T) => void) => void;
 
 export type Store = {
   // will be initialised once at the start
@@ -132,14 +145,14 @@ export type Store = {
 
   // updated via user form if any
   form: Accessor<Form>,
-  setForm: Setter<Form>,
+  setForm: Producer<Form>,
 
   // |
   // v
 
   // updated when form or user input updates
   params: Accessor<Params>,
-  setParams: (fn: ProduceParam) => void,
+  setParams: Producer<Params>,
 
   // |
   // v
@@ -169,4 +182,5 @@ export type JsonPayload = {
   },
   config: Config,
   fixedParamSets: FixedParamSet[],
+  forms: FormsConfig,
 }
