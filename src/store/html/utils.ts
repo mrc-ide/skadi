@@ -142,6 +142,22 @@ export const expectAttrs = (attrs: Attr[], el: Element) => {
   });
 };
 
+export const expectOnlyAttrs = (attrs: Attr[], el: Element) => {
+  for (let i = 0; i < el.attributes.length; i++) {
+    const a = el.attributes[i];
+    if (a.name.startsWith("w-")) {
+      
+    }
+  }
+  attrs.forEach(a => {
+    if (!getAttr(a, el)) {
+      error(el, elMsg =>
+        `Attribute "${w(a)}" missing from ${elMsg}`
+      );
+    }
+  });
+};
+
 export const expectOneOfAttrs = (attrSets: Attr[][], el: Element) => {
   let attrSetFound = false;
   outer: for (const attrs of attrSets) {
