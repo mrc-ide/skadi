@@ -1,32 +1,90 @@
 
 import { objForEach } from "../utils";
 
+// We automatically add a `w-` prefix to these attr names,
+// e.g. `w-store`
+type AttrSchema = {
+  name: string,
+  optional?: boolean,
+}
 
-// these refer to classes in the document, actual class names are these
-// prefixed with `w-`, e.g. `w-store-cfg`
-export type ClassName =
-  | "store-cfg"
-  | "graph-cfg"
-  | "par-cfg"
-  | "par"
-  | "plot"
+// We automatically add a `w-` prefix to these classes,
+// e.g. `w-storeCfg`
+type Schema = { class: string }
+  & ({ attrs: AttrSchema[] } | { oneOf: AttrSchema[][] })
 
-// these refer to attributes of elements in the document, actual attributes
-// are prefixed with `w-`, e.g. `w-store`
+const graphConfigSchema = [
+  { name: "vars", optional: true },
+  { name: "yLog", optional: true },
+] as const satisfies AttrSchema[];
+
+export const schemas = [
+  {
+    class: "storeCfg",
+    attrs: [
+      { name: "store" },
+      { name: "sync", optional: true },
+    ]
+  },
+  {
+    class: "graphCfg",
+    attrs: [
+      { name: "store" },
+      { name: "id" },
+      ...graphConfigSchema,
+    ]
+  },
+  {
+    class: "parCfg",
+    attrs: [
+      { name: "store" },
+      { name: "par" },
+      { name: "val" },
+      { name: "min" },
+      { name: "max" },
+      { name: "step", optional: true },
+    ]
+  },
+  {
+    class: "par",
+    attrs: [
+      { name: "store" },
+      { name: "par" },
+    ]
+  },
+  {
+    class: "plot",
+    oneOf: [
+      [
+        { name: "id" },
+      ],
+      [
+        { name: "store" },
+        ...graphConfigSchema,
+      ]
+    ]
+  },
+] as const satisfies Schema[];
+export type Schemas = typeof schemas;
+
+export type ClassName = Schemas[number]["class"]
+
+type GetAttrs<T> = T extends (infer R)[] ? R : never
+type GetOneOf<T> = T extends (infer R)[][] ? R : never
+type GetName<T> = T extends { name: infer N } ? N : never
+type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};
+type Values<T extends object> = Prettify<T[keyof T]>
+
 export type Attr =
-  | "store"
-  | "storeid"
-  | "sync"
-  | "id"
-  | "vars"
-  | "xrange"
-  | "yrange"
-  | "ylog"
-  | "par"
-  | "val"
-  | "min"
-  | "max"
-  | "step"
+  Values<{
+    [K in Schemas[number] as K["class"]]: "attrs" extends keyof K
+      ? GetName<GetAttrs<K["attrs"]>>
+      : "oneOf" extends keyof K
+        ? GetName<GetOneOf<K["oneOf"]>>
+        : never
+  }>
   | "error"
 
 // helper function to add `w-`

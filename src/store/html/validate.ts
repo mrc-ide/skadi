@@ -1,10 +1,24 @@
-import { Attr, attrEq, attrsEq, ClassName, error, expectAttrs, expectAttrsFn, expectOneOfAttrs, getAttr, getEl, getEls, isStrNumber, splitComma, w } from "./utils";
+import { Attr, attrEq, attrsEq, ClassName, error, expectAttrs, expectAttrsFn, expectOneOfAttrs, getAttr, getEl, getEls, isStrNumber, schemas, splitComma, w } from "./utils";
 import { GraphConfig, graphConfigKeys } from "../types";
 import { callIfDuplicate } from "../utils";
 
+const validateStructure = () => {
+  schemas.forEach(scheme => {
+    const els = getEls(scheme.class);
+    els.forEach(el => {
+      if ("attrs" in scheme) {
+        const requiredAttrs =
+          scheme.attrs.filter(a => !("optional" in a && a.optional));
+          
+      } else {
+        scheme.oneOf
+      }
+    });
+  });
+};
 
 const validateStoreConfigs = () => {
-  const els = getEls("store-cfg");
+  const els = getEls("storeCfg");
   
   // check it has correct attrs
   els.forEach(el => expectAttrs(["store", "sync"], el));
