@@ -7,7 +7,6 @@ import Plot from './components/Plot';
 import { objForEach } from './store/utils';
 import { getAttr, getEls } from './store/html/utils';
 import { JSX } from 'solid-js';
-import { validateHtml } from './store/html/validate';
 import Reactivity from './components/Reactivity';
 
 type RenderFunc = (el: Element, getJsx: () => JSX.Element) => void
@@ -35,14 +34,13 @@ const renderPlotEls = (store: string, renderWithStore: RenderFunc) => {
   return els.map(el =>  {
    const props = {
       store,
-      id: getAttr("storeid", el)!,
+      id: getAttr("storeId", el)!,
     };
     renderWithStore(el, () => <Plot {...props}/>)
   })
 };
 
 const main = async () => {
-  validateHtml();
   objForEach(
     await getStores(),
     (store, StoreProvider) => {
