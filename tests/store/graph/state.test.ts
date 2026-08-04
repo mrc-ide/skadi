@@ -10,17 +10,25 @@ const allVars = ["S", "I", "R"];
 const getDefaultFixed = (): Fixed => {
   return {
     json: {
-      modelMetadata: {} as any,
+      modelMetadata: {
+        variables: [],
+        parameters: [],
+      } as any,
       fixedParamSets: [],
       config: { startTime: 0, endTime: 100, particles: 1 },
     },
     html: {
-      sync: [],
-      vars: allVars,
-      pars: {
-        beta: { val: 4, min: 1, max: 10 }
+      parsed: {
+        storeCfg: [],
+        graphCfg: [],
+        parCfg: [],
+        plot: [],
+        par: [],
       },
-      graphMetadata: [],
+      processed: {
+        vars: allVars,
+        plot: [],
+      }
     },
     generator: {} as any
   };
@@ -72,7 +80,7 @@ const setupGraphStateTest = (args: Args) => {
 describe("graph state", () => {
   test("graph config gets all vars if not specified", () => {
     const { graphStates } = setupGraphStateTest({
-      fixed: f => f.html.graphMetadata = [{
+      fixed: f => f.html.processed.plot = [{
         id: "1", config: { vars: undefined }
       }]
     });
@@ -82,15 +90,18 @@ describe("graph state", () => {
   test("y range", () => {
     // S, I range is [4, 9] not [1, 9]
     const { graphStates: g2 } = setupGraphStateTest({
-      fixed: f => f.html.graphMetadata = get1GraphConfig(),
+      fixed: f => f.html.processed.plot = get1GraphConfig(),
     });
     expect(g2[0].config.yRange).toStrictEqual([4, 9])
 
     // however if y range synced, we take the full data range
     const { graphStates: g1 } = setupGraphStateTest({
       fixed: f => {
-        f.html.sync = ["yRange"];
-        f.html.graphMetadata = get1GraphConfig();
+        f.html.parsed.storeCfg = [{
+          store: "basic",
+          sync: ["yRange"]
+        }];
+        f.html.processed.plot = get1GraphConfig();
       },
     });
     expect(g1[0].config.yRange).toStrictEqual([1, 9])
@@ -98,13 +109,13 @@ describe("graph state", () => {
 
   test("x range respects json config", () => {
     const { graphStates: g1 } = setupGraphStateTest({
-      fixed: f => f.html.graphMetadata = get1GraphConfig(),
+      fixed: f => f.html.processed.plot = get1GraphConfig(),
     });
     expect(g1[0].config.xRange).toStrictEqual([0, 100]);
 
     const { graphStates: g2 } = setupGraphStateTest({
       fixed: f => {
-        f.html.graphMetadata = get1GraphConfig();
+        f.html.processed.plot = get1GraphConfig();
         delete f.json.config.startTime;
       },
     });
@@ -113,7 +124,7 @@ describe("graph state", () => {
 
   test("getGraphState", () => {
     const { graphStates, getGraphState } = setupGraphStateTest({
-      fixed: f => f.html.graphMetadata = get2GraphConfigs(),
+      fixed: f => f.html.processed.plot = get2GraphConfigs(),
     });
     expect(getGraphState("2")).toStrictEqual(graphStates[1]);
   });
@@ -121,8 +132,11 @@ describe("graph state", () => {
   test("syncs correct graph config props", () => {
     const { graphStates, setGraphConfig } = setupGraphStateTest({
       fixed: f => {
-        f.html.graphMetadata = get2GraphConfigs();
-        f.html.sync = ["yLog"];
+        f.html.processed.plot = get2GraphConfigs();
+        f.html.parsed.storeCfg = [{
+          store: "basic",
+          sync: ["yLog"]
+        }];
       },
     });
 
@@ -147,8 +161,11 @@ describe("graph state", () => {
   test("dispatches range update", () => {
     const { graphStates, setGraphConfig } = setupGraphStateTest({
       fixed: f => {
-        f.html.graphMetadata = get2GraphConfigs();
-        f.html.sync = ["xRange"];
+        f.html.processed.plot = get2GraphConfigs();
+        f.html.parsed.storeCfg = [{
+          store: "basic",
+          sync: ["xRange"]
+        }];
       },
     });
 
@@ -163,7 +180,7 @@ describe("graph state", () => {
 
   test("dispatches full rerender update", () => {
     const { graphStates, setGraphConfig } = setupGraphStateTest({
-      fixed: f => f.html.graphMetadata = get2GraphConfigs(),
+      fixed: f => f.html.processed.plot = get2GraphConfigs(),
     });
 
     const signalSpies = getSignalSpies(graphStates);

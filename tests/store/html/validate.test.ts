@@ -40,9 +40,6 @@ const runValidateHtmlTests = (tests: Tests) => {
   });
 };
 
-// jsdom does not have scrollTo implemented
-Element.prototype.scrollTo = () => {} 
-
 describe("html validate", () => {
   test("store configs", () => {
     runValidateHtmlTests([
