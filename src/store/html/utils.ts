@@ -151,8 +151,6 @@ export const findSchema = <
     try {
       expectSchema(s, el, false)
     } catch {
-      // on error we tag element with w-error, this reverts it as
-      // we don't care if some of these error
       return false;
     };
     return true;

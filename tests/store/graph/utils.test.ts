@@ -13,8 +13,8 @@ const dat: NamedResult = {
 describe("graph utils", () => {
   test("getXYRanges", () => {
     expect(getXYRanges(dat, ["beta"])).toStrictEqual({
-      xRange: [1, 3],
-      yRange: [5, 20],
+      xrange: [1, 3],
+      yrange: [5, 20],
     });
   });
 });

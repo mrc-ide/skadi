@@ -1,5 +1,4 @@
 import { describe, expect, test } from "vitest";
-import { objMap } from "../../../src/store/utils";
 import { Fixed } from "../../../src/store/types";
 import { getParamsStore } from "../../../src/store/params/state";
 import { renderHook } from "@solidjs/testing-library";
@@ -9,10 +8,10 @@ type Pars = Record<string, number>
 const getFixed = (pars: Pars): Fixed => {
   return {
     html: {
-      pars: objMap(
-        pars,
-        (_, v) => ({ val: v })
-      )
+      parsed: {
+        parCfg: Object.entries(pars)
+          .map(([par, val]) => ({ par, val }))
+      }
     }
   } as any as Fixed;
 };

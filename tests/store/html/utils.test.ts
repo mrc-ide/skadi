@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
-import { attrEq, attrsEq, error, expectAttrs, getAttr, getEl, getEls, setAttr, w } from "../../../src/store/html/utils";
+import { attrEq, attrsEq, error, expectAttrs, getAttr, getEl, getEls, getStoresInPage, setAttr, w } from "../../../src/store/html/utils";
 import { htmlAppend, htmlClear } from "./helpers";
 
 describe("html utils", () => {
@@ -48,6 +48,7 @@ describe("html utils", () => {
     expect(() => {
       error(el, x => x);
     }).toThrow("w-error");
+    expect(document.getElementsByClassName("error-overlay")).toBeDefined();
     expect(getAttr("error", el)).toBe("");
   });
 
@@ -72,5 +73,11 @@ describe("html utils", () => {
     const [ el1, el2, el3 ] = getEls("par")!;
     expect(attrsEq(["store", "par"])(el1, el2)).toBe(true);
     expect(attrsEq(["store", "par"])(el2, el3)).toBe(false);
+  });
+
+  test("getStoresInPage", () => {
+    expect(getStoresInPage()).toStrictEqual([
+      "basic", "basic:1"
+    ]);
   });
 });

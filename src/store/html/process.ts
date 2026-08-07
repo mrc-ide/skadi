@@ -9,7 +9,7 @@ const parseSingleAttrs = (attrsSchema: AttrSchema[], el: Element) => {
     a => a.name,
     a => {
       const val = getAttr(a.name, el);
-      if (!val) return;
+      if (val === null || val === undefined) return;
 
       const type: AttrType = a.type || "string";
       const parser = typeParsers[type];
@@ -36,17 +36,17 @@ export const processHtml = (store: string, json: JsonPayload) => {
 
   const plot = zip(parsed.plot, getEls("plot", { store }))
     .reduce((metadata, [cfg, el]) => {
-      const storeId = getAttr("storeId", el);
-      if (storeId) return metadata;
+      const storeid = getAttr("storeid", el);
+      if (storeid) return metadata;
 
-      // assign storeId to current graph or all graphs with matching
+      // assign storeid to current graph or all graphs with matching
       // user id if provided
       const uuid = crypto.randomUUID();
       const id = getAttr("id", el);
       const elsWithId = id
         ? getEls("plot", { store, id })
         : [el]
-      elsWithId.forEach(x => setAttr("storeId", uuid, x));
+      elsWithId.forEach(x => setAttr("storeid", uuid, x));
 
       // get config
       let config: Partial<GraphConfig>;

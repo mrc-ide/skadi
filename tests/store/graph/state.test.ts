@@ -11,7 +11,7 @@ const getDefaultFixed = (): Fixed => {
   return {
     json: {
       modelMetadata: {
-        variables: [],
+        variables: allVars.map(name => ({ name })),
         parameters: [],
       } as any,
       fixedParamSets: [],
@@ -92,26 +92,26 @@ describe("graph state", () => {
     const { graphStates: g2 } = setupGraphStateTest({
       fixed: f => f.html.processed.plot = get1GraphConfig(),
     });
-    expect(g2[0].config.yRange).toStrictEqual([4, 9])
+    expect(g2[0].config.yrange).toStrictEqual([4, 9])
 
     // however if y range synced, we take the full data range
     const { graphStates: g1 } = setupGraphStateTest({
       fixed: f => {
         f.html.parsed.storeCfg = [{
           store: "basic",
-          sync: ["yRange"]
+          sync: ["yrange"]
         }];
         f.html.processed.plot = get1GraphConfig();
       },
     });
-    expect(g1[0].config.yRange).toStrictEqual([1, 9])
+    expect(g1[0].config.yrange).toStrictEqual([1, 9])
   });
 
   test("x range respects json config", () => {
     const { graphStates: g1 } = setupGraphStateTest({
       fixed: f => f.html.processed.plot = get1GraphConfig(),
     });
-    expect(g1[0].config.xRange).toStrictEqual([0, 100]);
+    expect(g1[0].config.xrange).toStrictEqual([0, 100]);
 
     const { graphStates: g2 } = setupGraphStateTest({
       fixed: f => {
@@ -119,7 +119,7 @@ describe("graph state", () => {
         delete f.json.config.startTime;
       },
     });
-    expect(g2[0].config.xRange).toStrictEqual([1, 100]);
+    expect(g2[0].config.xrange).toStrictEqual([1, 100]);
   });
 
   test("getGraphState", () => {
@@ -135,21 +135,21 @@ describe("graph state", () => {
         f.html.processed.plot = get2GraphConfigs();
         f.html.parsed.storeCfg = [{
           store: "basic",
-          sync: ["yLog"]
+          sync: ["ylog"]
         }];
       },
     });
 
     const newXRange = [-1, -2] as Range;
-    setGraphConfig("2", { xRange: newXRange, yLog: true });
+    setGraphConfig("2", { xrange: newXRange, ylog: true });
 
     // does not sync x range
-    expect(graphStates[0].config.xRange).not.toStrictEqual(newXRange);
-    expect(graphStates[1].config.xRange).toStrictEqual(newXRange);
+    expect(graphStates[0].config.xrange).not.toStrictEqual(newXRange);
+    expect(graphStates[1].config.xrange).toStrictEqual(newXRange);
 
     // syncs y log
-    expect(graphStates[0].config.yLog).toBe(true);
-    expect(graphStates[1].config.yLog).toBe(true);
+    expect(graphStates[0].config.ylog).toBe(true);
+    expect(graphStates[1].config.ylog).toBe(true);
   });
 
   const getSignalSpies = (graphStates: GraphState[]) =>
@@ -164,7 +164,7 @@ describe("graph state", () => {
         f.html.processed.plot = get2GraphConfigs();
         f.html.parsed.storeCfg = [{
           store: "basic",
-          sync: ["xRange"]
+          sync: ["xrange"]
         }];
       },
     });
@@ -172,7 +172,7 @@ describe("graph state", () => {
     const signalSpies = getSignalSpies(graphStates);
 
     const newXRange = [-1, -2] as Range;
-    setGraphConfig("2", { xRange: newXRange });
+    setGraphConfig("2", { xrange: newXRange });
 
     signalSpies.forEach(s => expect(s.setFullRerender).not.toHaveBeenCalledTimes(1));
     signalSpies.forEach(s => expect(s.setRangeUpdated).toHaveBeenCalled());
@@ -185,7 +185,7 @@ describe("graph state", () => {
 
     const signalSpies = getSignalSpies(graphStates);
 
-    setGraphConfig("2", { yLog: true });
+    setGraphConfig("2", { ylog: true });
 
     signalSpies.forEach(s => expect(s.setRangeUpdated).not.toHaveBeenCalled());
     expect(signalSpies[0].setFullRerender).not.toHaveBeenCalled();

@@ -4,10 +4,10 @@ import { Chart } from "@reside-ic/skadi-chart";
 import { PlotData, Range } from "../store/types";
 import { getLine } from "./utils";
 
-type RangeObj = { xRange: Range, yRange: Range }
+type RangeObj = { xrange: Range, yrange: Range }
 const rangeToExtent = (obj: RangeObj) => ({
-  x: { start: obj.xRange[0], end: obj.xRange[1] },
-  y: { start: obj.yRange[0], end: obj.yRange[1] },
+  x: { start: obj.xrange[0], end: obj.xrange[1] },
+  y: { start: obj.yrange[0], end: obj.yrange[1] },
 })
 
 const Plot: Component<{ store: string, id: string }> = props => {
@@ -41,7 +41,7 @@ const Plot: Component<{ store: string, id: string }> = props => {
 
     const scales = rangeToExtent(cfg);
     const maxScales = rangeToExtent(data.main);
-    const sChart = new Chart({ logScale: { y: cfg.yLog } })
+    const sChart = new Chart({ logScale: { y: cfg.ylog } })
       .addAxes()
       .addTraces(plotData.lines)
       .addGridLines()
@@ -49,8 +49,8 @@ const Plot: Component<{ store: string, id: string }> = props => {
       .addCustomLifecycleHooks({
         beforeZoom: zoomProperties => {
           store.setGraphConfig(props.id, {
-            xRange: zoomProperties.x,
-            yRange: zoomProperties.y,
+            xrange: zoomProperties.x,
+            yrange: zoomProperties.y,
           });
         }
       })
@@ -60,8 +60,8 @@ const Plot: Component<{ store: string, id: string }> = props => {
   };
 
   const handleZoom = () => skadiChart()!.handleZoom({
-    x: gState.config.xRange,
-    y: gState.config.yRange,
+    x: gState.config.xrange,
+    y: gState.config.yrange,
     eventType: "brush",
   });
 

@@ -71,8 +71,8 @@ export type Form = Record<string, any>
 export type Range = [number, number]
 export type DataWithRange = {
   data: NamedResult,
-  xRange: Range,
-  yRange: Range,
+  xrange: Range,
+  yrange: Range,
 }
 export type GraphData = {
   main: DataWithRange,
@@ -81,12 +81,12 @@ export type GraphData = {
 
 export type GraphConfig = {
   vars: string[],
-  xRange: Range,
-  yRange: Range,
-  yLog: boolean,
+  xrange: Range,
+  yrange: Range,
+  ylog: boolean,
 }
 export const graphConfigKeys = [
-  "vars", "xRange", "yRange", "yLog"
+  "vars", "xrange", "yrange", "ylog"
 ] as const satisfies (keyof GraphConfig)[];
 
 export type LowercaseArray<T extends string[]> =

@@ -47,10 +47,10 @@ describe("html validate", () => {
         html: `
           <div class="w-storeCfg"
             w-store="basic"
-            w-sync="xRange"></div>
+            w-sync="xrange"></div>
           <div class="w-storeCfg"
             w-store="basic"
-            w-sync="xRange"></div>
+            w-sync="xrange"></div>
         `,
         errMsg: ["unique"]
       },
@@ -66,7 +66,7 @@ describe("html validate", () => {
         html: `
           <div class="w-storeCfg"
             w-store="basic"
-            w-sync="xRange"></div>
+            w-sync="xrange"></div>
         `,
       },
     ]);

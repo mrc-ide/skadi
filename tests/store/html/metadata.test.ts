@@ -1,133 +1,118 @@
-import { afterEach, describe, expect, test } from "vitest";
+import { afterEach, beforeEach, describe, expect, test } from "vitest";
 import { htmlAppend, htmlClear } from "./helpers";
-import { getHtmlMetadata, getStoresInPage } from "../../../src/store/html/metadata";
-import { FixedJson } from "../../../src/store/types";
-import { getAttr, getEl, getEls } from "../../../src/store/html/utils";
+import { JsonPayload } from "../../../src/store/types";
+import { processHtml } from "../../../src/store/html/process";
 
-const fixedJson = {
-  modelMetadata: {
-    variables: [
-      { name: "S" },
-      { name: "I" },
-      { name: "R" },
-    ]
+const jsonPayload = {
+  model: {
+    metadata: {
+      variables: [
+        { name: "S" },
+        { name: "I" },
+        { name: "R" },
+      ],
+      parameters: [
+        { name: "beta" },
+        { name: "sigma" },
+      ],
+    }
   }
-} as any as FixedJson;
+} as JsonPayload;
 
-describe("html metadata", () => {
+describe("process html", () => {
+  beforeEach(() => htmlAppend(`
+    <div class="w-storeCfg"
+         w-store="basic"
+         w-sync="yrange"></div>
+    
+    <div class="w-graphCfg"
+         w-id="1"
+         w-store="basic"
+         w-yrange="0,100"
+         w-ylog
+         w-vars="I"></div>
+
+    <div class="w-parCfg"
+         w-store="basic"
+         w-par="beta"
+         w-val="4"
+         w-min="1"
+         w-max="6"
+         w-step="0.1"></div>
+
+    <div class="w-par" w-store="basic" w-par="beta"></div>
+
+    <div class="w-plot" w-store="basic" w-id="1"></div>
+    <div class="w-plot" w-store="basic" w-id="1"></div>
+    <div class="w-plot" w-store="basic" w-vars="S, I"></div>
+
+    <div class="w-plot" w-store="basic:1" w-xrange="-1,2.3"></div>
+  `));
+
   afterEach(htmlClear);
 
-  test("getStoresInPage", () => {
-    htmlAppend(`
-      <div w-store="foo"></div>
-      <div w-store="foo:1"></div>
-      <div w-store="bar"></div>
-    `);
-    expect(getStoresInPage()).toStrictEqual([
-      "foo", "foo:1", "bar"
-    ]);
-  });
-
-  test("resolves store attr from graph cfg", () => {
-    htmlAppend(`
-      <div class="w-graph-cfg"
-           w-store="basic"
-           w-id="1"></div>
-      <div class="w-plot" w-id="1"></div>
-    `);
-    getHtmlMetadata("basic", fixedJson);
-    expect(getAttr("store", getEl("plot")!)).toBe("basic")
-  });
-  
-  test("generates store id attr", () => {
-    htmlAppend(`
-      <div class="w-graph-cfg"
-           w-store="basic"
-           w-id="1"></div>
-      <div class="w-plot" w-id="1"></div>
-      <div class="w-plot" w-id="1"></div>
-      <div class="w-plot" w-store="basic"></div>
-    `);
-    getHtmlMetadata("basic", fixedJson);
-    const [ p1, p2, p3 ] = getEls("plot");
-    expect(getAttr("storeid", p1)).toBe(getAttr("storeid", p2));
-    expect(getAttr("storeid", p1)).not.toBe(getAttr("storeid", p3));
-  });
-
-  test("aggregates sync", () => {
-    htmlAppend(`
-      <div class="w-store-cfg"
-           w-store="basic"
-           w-sync="x"></div>
-      <div class="w-store-cfg"
-           w-store="basic"
-           w-sync="y, z"></div>
-    `);
-    const { sync } = getHtmlMetadata("basic", fixedJson);
-    expect(sync).toStrictEqual(["x", "y", "z"]);
-  });
-
-  test("aggregates vars", () => {
-    htmlAppend(`
-      <div class="w-plot"
-           w-store="basic"
-           w-vars="x"></div>
-      <div class="w-plot"
-           w-store="basic"
-           w-vars="y, z"></div>
-    `);
-    const { vars } = getHtmlMetadata("basic", fixedJson);
-    expect(vars).toStrictEqual(["x", "y", "z"]);
-  });
-
-  test("defaults to all vars if not specified", () => {
-    htmlAppend(`
-      <div class="w-plot"
-           w-store="basic"
-           w-vars="S"></div>
-      <div class="w-plot"
-           w-store="basic"></div>
-    `);
-    const { vars } = getHtmlMetadata("basic", fixedJson);
-    expect(vars).toStrictEqual(["S", "I", "R"]);
-  });
-
-  test("gets graph metadata", () => {
-    htmlAppend(`
-      <div class="w-graph-cfg"
-           w-store="basic"
-           w-id="1"
-           w-vars="S"></div>
-      <div class="w-plot" w-id="1"></div>
-      <div class="w-plot" w-id="1"></div>
-      <div class="w-plot" w-store="basic" w-vars="R"></div>
-    `);
-    const { graphMetadata } = getHtmlMetadata("basic", fixedJson);
-    expect(graphMetadata).toHaveLength(2);
-    expect(graphMetadata[0].config.vars).toStrictEqual(["S"]);
-    expect(graphMetadata[1].config.vars).toStrictEqual(["R"]);
-  });
-
-  test("gets par config", () => {
-    htmlAppend(`
-      <div class="w-par-cfg"
-           w-store="basic"
-           w-par="sigma"
-           w-val="2"
-           w-min="0"
-           w-max="2.5"
-           w-step="0.1"></div>
-      <div class="w-par-cfg"
-           w-store="basic"
-           w-par="beta"
-           w-val="6"
-           w-min="1"
-           w-max="10"></div>
-    `);
-    const { pars } = getHtmlMetadata("basic", fixedJson);
-    expect(pars).toStrictEqual({
-      sigma: { val: 2, min: 0, max: 2.5, step: 0.1 },
-      beta: { val: 6, min: 1, max: 10, step: undefined },
+  test("parses correctly", () => {
+    const { parsed: p1 } = processHtml("basic", jsonPayload);
+    expect(p1).toStrictEqual({
+      storeCfg: [{
+        sync: ["yrange"],
+      }],
+      graphCfg: [{
+        vars: ["I"],
+        xrange: undefined,
+        yrange: [0, 100],
+        ylog: true,
+      }],
+      parCfg: [{
+        par: "beta",
+        val: 4,
+        min: 1,
+        max: 6,
+        step: 0.1,
+      }],
+      par: [{ par: "beta" }],
+      plot: [
+        { id: "1" },
+        { id: "1" },
+        {
+          vars: ["S", "I"],
+          xrange: undefined,
+          yrange: undefined,
+          ylog: undefined,
+        }
+      ]
     });
+
+    const { parsed: p2 } = processHtml("basic:1", jsonPayload);
+    expect(p2).toStrictEqual({
+      storeCfg: [],
+      graphCfg: [],
+      parCfg: [],
+      par: [],
+      plot: [{
+        vars: undefined,
+        xrange: [-1, 2.3],
+        yrange: undefined,
+        ylog: undefined,
+      }]
+    });
+  });
+
+  test("defaults to all vars if no w-vars", () => {
+    const { processed: p1 } = processHtml("basic", jsonPayload);
+    expect(p1.vars).toStrictEqual(["I", "S"]);
+
+    const { processed: p2 } = processHtml("basic:1", jsonPayload);
+    expect(p2.vars).toStrictEqual(["S", "I", "R"]);
+  });
+
+  test("plots get assigned store ids", () => {
+    const { processed: p1 } = processHtml("basic", jsonPayload);
+    // 3 plot tags but two have the same w-id
+    expect(p1.plot).toHaveLength(2);
+    const storeids = Array.from(document.querySelectorAll('.w-plot[w-store="basic"]'))
+      .map(el => el.getAttribute("w-storeid")!);
+    expect(storeids[0]).toBe(storeids[1]);
+    expect(storeids[1]).not.toBe(storeids[2]);
   });
 });

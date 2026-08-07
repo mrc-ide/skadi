@@ -70,9 +70,9 @@ type Schema = {
 
 const graphConfigSchema = [
   { name: "vars", optional: true, type: "variable", isArray: true },
-  { name: "xRange", optional: true, type: "range" },
-  { name: "yRange", optional: true, type: "range" },
-  { name: "yLog", optional: true, type: "boolean" },
+  { name: "xrange", optional: true, type: "range" },
+  { name: "yrange", optional: true, type: "range" },
+  { name: "ylog", optional: true, type: "boolean" },
 ] as const satisfies GraphConfigSchemaSatisfies[];
 
 export const schemas = [
@@ -140,7 +140,7 @@ export const attributes = schemas.flatMap(
 export type Attribute =
   | (typeof attributes)[number]
   | "error"
-  | "storeId"
+  | "storeid"
 
 export type AttrSchema = Omit<AttrSchemaSatisfies, "name"> & {
   name: Attribute

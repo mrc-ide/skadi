@@ -34,7 +34,7 @@ const renderPlotEls = (store: string, renderWithStore: RenderFunc) => {
   return els.map(el =>  {
    const props = {
       store,
-      id: getAttr("storeId", el)!,
+      id: getAttr("storeid", el)!,
     };
     renderWithStore(el, () => <Plot {...props}/>)
   })
