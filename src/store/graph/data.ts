@@ -17,7 +17,7 @@ export const calculateGraphData = (fixed: Fixed, params: Record<string, Paramete
 
   const nPoints = 1000;
   const timeStep = (endTime - (startTime || 0)) / nPoints;
-  const { vars } = fixed.html;
+  const { vars } = fixed.html.processed;
 
   const data = sys.simulateByStateVarName(
     Array.from({ length: nPoints }).map((_, i) => i * timeStep),

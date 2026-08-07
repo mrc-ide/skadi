@@ -10,7 +10,7 @@ export type ParamsProps = {
 
 const ParamSlider: Component<ParamsProps> = props => {
   const store = useStore(props.store);
-  const { min, max, step } = store.fixed.html.pars[props.par];
+  const { min, max, step } = store.fixed.html.parsed.parCfg.find(p => p.par = props.par)!;
 
   const setParamValue = (v: number[]) => {
     if (store.params().user[props.par] === v[0]) return;

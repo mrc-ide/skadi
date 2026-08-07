@@ -1,6 +1,7 @@
 import { ContinuousGeneratorODE, DiscreteGenerator, NamedResult } from "@reside-ic/dust2"
 import { Lines, ScatterPoints } from "@reside-ic/skadi-chart"
 import { Accessor, Setter } from "solid-js"
+import { ParsedHtml } from "./html/schema"
 
 export type ModelInfo = { name: string }
 export type ModelMetadata = {
@@ -41,17 +42,12 @@ export type Params = {
 export type GraphHtmlMetadata = {
   id: string, config: Partial<GraphConfig>
 }
-export type ParamsConfig = {
-  val: number,
-  min: number,
-  max: number,
-  step?: number | undefined
-}
-export type HtmlMetadata = {
-  graphMetadata: GraphHtmlMetadata[],
-  sync: (keyof GraphConfig)[],
-  vars: string[],
-  pars: Record<string, ParamsConfig>,
+export type ProcessedHtml = {
+  parsed: ParsedHtml,
+  processed: {
+    plot: GraphHtmlMetadata[],
+    vars: string[],
+  }
 }
 
 export type FixedParamSet = Partial<Params> & {
@@ -75,8 +71,8 @@ export type Form = Record<string, any>
 export type Range = [number, number]
 export type DataWithRange = {
   data: NamedResult,
-  xRange: Range,
-  yRange: Range,
+  xrange: Range,
+  yrange: Range,
 }
 export type GraphData = {
   main: DataWithRange,
@@ -85,12 +81,12 @@ export type GraphData = {
 
 export type GraphConfig = {
   vars: string[],
-  xRange: Range,
-  yRange: Range,
-  yLog: boolean,
+  xrange: Range,
+  yrange: Range,
+  ylog: boolean,
 }
 export const graphConfigKeys = [
-  "vars", "xRange", "yRange", "yLog"
+  "vars", "xrange", "yrange", "ylog"
 ] as const satisfies (keyof GraphConfig)[];
 
 export type LowercaseArray<T extends string[]> =
@@ -120,7 +116,7 @@ export type GraphSignal = keyof {
 export type Fixed = {
   json: FixedJson,
   generator: Generator,
-  html: HtmlMetadata,
+  html: ProcessedHtml,
 }
 
 export type ProduceParam = (p: Params) => void

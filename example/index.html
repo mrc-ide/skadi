@@ -7,16 +7,16 @@
   </head>
   <body>
     <!-- Config for basic store -->
-    <div class="w-store-cfg"
+    <div class="w-storeCfg"
          w-store="basic"
-         w-sync="yRange"></div>
+         w-sync="yrange"></div>
     
-    <div class="w-graph-cfg"
+    <div class="w-graphCfg"
          w-id="1"
          w-store="basic"
          w-vars="R, I"></div>
 
-    <div class="w-par-cfg"
+    <div class="w-parCfg"
          w-store="basic"
          w-par="beta"
          w-val="4"
@@ -24,7 +24,7 @@
          w-max="6"
          w-step="0.1"></div>
 
-    <div class="w-par-cfg"
+    <div class="w-parCfg"
          w-store="basic"
          w-par="sigma"
          w-val="2"
@@ -38,25 +38,23 @@
     <div class="w-par" w-store="basic" w-par="sigma"></div>
 
     <div class="graph-container">
-      <div class="w-plot" w-id="1"></div>
-      <div class="w-plot" w-id="1"></div>
+      <div class="w-plot" w-store="basic" w-id="1"></div>
+      <div class="w-plot" w-store="basic" w-id="1"></div>
       <div class="w-plot" w-store="basic" w-vars="S, I"></div>
     </div>
-    
 
 
 
-
-    <div class="w-store-cfg"
+    <div class="w-storeCfg"
          w-store="basic:1"
-         w-sync="xRange, yRange"></div>
+         w-sync="xrange, yrange"></div>
     
-    <div class="w-graph-cfg"
+    <div class="w-graphCfg"
          w-id="2"
          w-store="basic:1"
          w-vars="I"></div>
 
-    <div class="w-par-cfg"
+    <div class="w-parCfg"
          w-store="basic:1"
          w-par="beta"
          w-val="4"
@@ -67,8 +65,8 @@
     <div class="w-par" w-store="basic:1" w-par="beta"></div>
 
     <div class="graph-container">
-      <div class="w-plot" w-id="2"></div>
-      <div class="w-plot" w-id="2"></div>
+      <div class="w-plot" w-store="basic:1" w-id="2"></div>
+      <div class="w-plot" w-store="basic:1" w-id="2"></div>
       <div class="w-plot" w-store="basic:1" w-vars="S, R"></div>
     </div>
 

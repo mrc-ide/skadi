@@ -49,6 +49,15 @@ export const unique = <T>(
   return arr.reduce((unique, el) => addIfNotIn(unique, el, eq), [] as T[]);
 };
 
+export const all = (arr: boolean[]) =>
+  arr.reduce((bool, a) => bool && a, true);
+
+export const zip = <
+  ArrType1, ArrType2,
+>(arr1: ArrType1[], arr2: ArrType2[]) => {
+  return arr1.map((a, i) => [a, arr2[i]] as [ArrType1, ArrType2]);
+};
+
 export const deepCopy = (obj: object) => {
   return JSON.parse(JSON.stringify(obj));
 };
@@ -180,6 +189,13 @@ export const objKeys = <
 >(
   obj: Obj,
 ) => Object.keys(obj) as (keyof Obj)[];
+
+export type Prettify<T> = {
+  [K in keyof T]: T[K];
+} & {};
+
+export const splitComma = (str: string | undefined | null) =>
+  str?.split(",").map(s => s.trim());
 
 
 // this is an inefficient but convenient function to iterate through multiple

@@ -1,0 +1,57 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  --error-light: #f1f1f1;
+  --error-dark: #202020;
+  --error-border-radius: 25px;
+}
+
+body {
+  margin: 0;
+}
+
+.error-overlay {
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  padding-inline: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-family: monospace, monospace;
+
+  background-color: rgba(0, 0, 0, 0.75);
+  color: var(--error-light);
+}
+
+.error-text, .error-in-devtools-text {
+  font-size: 1.2rem;
+  padding-inline: 2rem;
+  padding-block: 1rem;
+}
+
+.error-text, .error-in-devtools-text, .error-code-container {
+  background-color: var(--error-dark);
+}
+
+.error-text {
+  border-top-left-radius: var(--error-border-radius);
+  border-top-right-radius: var(--error-border-radius);
+}
+
+.error-in-devtools-text {
+  border-bottom-left-radius: var(--error-border-radius);
+  border-bottom-right-radius: var(--error-border-radius);
+}
+
+.error-code-container {
+  height: max(500px, 60%);
+  white-space: pre;
+  overflow: auto;
+  scrollbar-color: rgba(255, 255, 255, 0.4) var(--error-dark);
+  border-top: 1px solid var(--error-light);
+  border-bottom: 1px solid var(--error-light);
+}

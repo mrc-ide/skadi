@@ -1,13 +1,14 @@
 import { createSignal } from "solid-js";
 import { Fixed, Params, ProduceParam } from "../types";
-import { deepCopy, objMap } from "../utils";
+import { deepCopy, objFrom } from "../utils";
 
 export const getParamsStore = (fixed: Fixed) => {
   const initialParams: Params = {
     static: {},
-    user: objMap(
-      fixed.html.pars,
-      (_, v) => v.val
+    user: objFrom(
+      fixed.html.parsed.parCfg,
+      p => p.par,
+      p => p.val,
     ),
   }
   const [params, setParams] = createSignal<Params>(initialParams);

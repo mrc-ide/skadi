@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from "vitest";
-import { attrEq, attrsEq, error, expectAttrFn, expectAttrs, expectAttrsFn, expectOneOfAttrs, getAttr, getEl, getEls, isStrNumber, setAttr, splitComma, w } from "../../../src/store/html/utils";
+import { attrEq, attrsEq, error, expectAttrs, getAttr, getEl, getEls, getStoresInPage, setAttr, w } from "../../../src/store/html/utils";
 import { htmlAppend, htmlClear } from "./helpers";
 
 describe("html utils", () => {
   beforeEach(() => htmlAppend(`
-    <div class="w-par-cfg"
+    <div class="w-parCfg"
          w-store="basic"
          w-par="sigma"
          w-val="2"
@@ -48,6 +48,7 @@ describe("html utils", () => {
     expect(() => {
       error(el, x => x);
     }).toThrow("w-error");
+    expect(document.getElementsByClassName("error-overlay")).toBeDefined();
     expect(getAttr("error", el)).toBe("");
   });
 
@@ -62,59 +63,6 @@ describe("html utils", () => {
     }).toThrow("missing");
   });
 
-  test("expectOneOfAttrs", () => {
-    const el = getEl("plot")!;
-    expect(() => {
-      expectOneOfAttrs([["store", "vars"], ["max"]], el);
-    }).not.toThrow();
-
-    expect(() => {
-      expectOneOfAttrs([["min"], ["max"]], el);
-    }).toThrow("attributes");
-  });
-
-  test("expectAttrFn", () => {
-    const el = getEl("par-cfg")!;
-    expect(() => {
-      expectAttrFn(
-        "min",
-        el,
-        s => s === "1",
-        errMsg => errMsg
-      )
-    }).not.toThrow();
-
-    expect(() => {
-      expectAttrFn(
-        "min",
-        el,
-        s => s === "1.5",
-        errMsg => errMsg
-      )
-    }).toThrow();
-  });
-
-  test("expectAttrsFn", () => {
-    const el = getEl("par-cfg")!;
-    expect(() => {
-      expectAttrsFn(
-        ["min", "max"],
-        el,
-        s => Number.isInteger(parseFloat(s!)),
-        errMsg => errMsg
-      )
-    }).not.toThrow();
-
-    expect(() => {
-      expectAttrsFn(
-        ["min", "par"],
-        el,
-        s => Number.isInteger(parseFloat(s!)),
-        errMsg => errMsg
-      )
-    }).toThrow();
-  });
-
   test("attrEq", () => {
     const [ el1, el2, el3 ] = getEls("par")!;
     expect(attrEq("par")(el1, el2)).toBe(true);
@@ -127,16 +75,9 @@ describe("html utils", () => {
     expect(attrsEq(["store", "par"])(el2, el3)).toBe(false);
   });
 
-  test("splitComma", () => {
-    expect(splitComma("1, 2, 3")).toStrictEqual(["1", "2", "3"]);
-    expect(splitComma(null)).toBe(undefined);
-    expect(splitComma(undefined)).toBe(undefined);
-  });
-
-  test("isStrNumber", () => {
-    expect(isStrNumber("100")).toBe(true);
-    expect(isStrNumber(null)).toBe(false);
-    expect(isStrNumber(undefined)).toBe(false);
-    expect(isStrNumber("three")).toBe(false);
+  test("getStoresInPage", () => {
+    expect(getStoresInPage()).toStrictEqual([
+      "basic", "basic:1"
+    ]);
   });
 });

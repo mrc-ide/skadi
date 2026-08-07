@@ -3,43 +3,45 @@ import { DataWithRange, Fixed, GraphConfig, graphConfigKeys, GraphData, GraphSig
 import { getXYRanges } from "./utils";
 import { objAssignIfTruthy, objFilter, objKeys, objMergeAndAssignKey } from "../utils";
 
-const getGraphRanges = (dat: DataWithRange, vars: string[], fixed: Fixed) => {
-    const { json, html } = fixed;
-    const { xRange, yRange, data } = dat;
+const getGraphRanges = (
+  { xrange, yrange, data }: DataWithRange,
+  vars: string[],
+  { json, html }: Fixed
+) => {
+  // we want y range to be synced which means the range as to be the max of the
+  // vars in *all* graphs, not just the current graph, x range will automatically
+  // be synced at the start since they all share time values
+  const ranges = html.parsed.storeCfg[0]?.sync?.includes("yrange")
+    ? { xrange, yrange }
+    : getXYRanges(data, vars);
 
-    // we want y range to be synced which means the range as to be the max of the
-    // vars in *all* graphs, not just the current graph, x range will automatically
-    // be synced at the start since they all share time values
-    const ranges = html.sync.includes("yRange")
-      ? { xRange, yRange }
-      : getXYRanges(data, vars);
+  // endTime is not optional in the config
+  ranges.xrange = [
+    json.config.startTime ?? ranges.xrange[0],
+    json.config.endTime
+  ] as Range;
 
-    // endTime is not optional in the config
-    ranges.xRange = [
-      json.config.startTime ?? ranges.xRange[0],
-      json.config.endTime
-    ] as Range;
-
-    return ranges;
+  return ranges;
 };
 
 const createGraphStates = (
   fixed: Fixed,
   graphData: DataWithRange,
 ) => {
-  return fixed.html.graphMetadata.map(g => {
+  return fixed.html.processed.plot.map(g => {
     const [fullRerender, setFullRerender] = createSignal(false);
     const [rangeUpdated, setRangeUpdated] = createSignal(false);
 
     // default to all vars if not specified in html
-    const vars = g.config.vars ?? fixed.html.vars;
-    const { xRange, yRange } = getGraphRanges(graphData, vars, fixed);
+    const allVars = fixed.json.modelMetadata.variables.map(v => v.name);
+    const vars = g.config.vars ?? allVars;
+    const { xrange, yrange } = getGraphRanges(graphData, vars, fixed);
 
     return {
       id: g.id,
       config: objAssignIfTruthy(
         graphConfigKeys, g.config,
-        { vars, xRange, yRange, yLog: false }
+        { vars, xrange, yrange, ylog: false }
       ),
       signals: {
         fullRerender, setFullRerender,
@@ -82,12 +84,12 @@ export const getGraphStateStore = (fixed: Fixed, graphData: GraphData) => {
 
     const propsToSync = objFilter(
       changedProps,
-      k => fixed.html.sync.includes(k)
+      k => !!fixed.html.parsed.storeCfg[0]?.sync?.includes(k)
     );
 
     const syncKeys = objKeys(propsToSync);
     const updateType: GraphSignal =
-      syncKeys.includes("yRange") || syncKeys.includes("xRange")
+      syncKeys.includes("yrange") || syncKeys.includes("xrange")
         ? "rangeUpdated"
         : "fullRerender";
 

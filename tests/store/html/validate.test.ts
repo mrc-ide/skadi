@@ -1,36 +1,39 @@
 import { describe, expect, test } from "vitest";
-import { validateHtml, validateVars } from "../../../src/store/html/validate";
+import { validateHtml } from "../../../src/store/html/validate";
 import { htmlAppend, htmlClear } from "./helpers";
+import { JsonPayload } from "../../../src/store/types";
 
 type Test = { html: string }
-  & ({} | { errMsg: string })
+  & ({} | { errMsg: string[] })
 type Tests = Test[]
 
-type VarTest = Test & { vars: string[] }
-type VarTests = VarTest[]
+const jsonPayload = {
+  model: {
+    metadata: {
+      variables: [
+        { name: "S" },
+        { name: "I" },
+        { name: "R" },
+      ],
+      parameters: [
+        { name: "beta" },
+        { name: "sigma" },
+      ],
+    }
+  }
+} as JsonPayload;
 
 const runValidateHtmlTests = (tests: Tests) => {
   tests.forEach(t => {
     htmlAppend(t.html);
 
     if ("errMsg" in t) {
-      expect(validateHtml).toThrow(t.errMsg);
+      const lookAheads = t.errMsg.map(w => `(?=.*${w})`).join("");
+      const errRegex = new RegExp(`^${lookAheads}.*`, "i");
+
+      expect(() => validateHtml("basic", jsonPayload)).toThrow(errRegex);
     } else {
-      expect(validateHtml).not.toThrow();
-    }
-
-    htmlClear();
-  });
-};
-
-const runValidateVarsTest = (tests: VarTests) => {
-  tests.forEach(t => {
-    htmlAppend(t.html);
-
-    if ("errMsg" in t) {
-      expect(() => validateVars("basic", t.vars)).toThrow(t.errMsg);
-    } else {
-      expect(() => validateVars("basic", t.vars)).not.toThrow();
+      expect(() => validateHtml("basic", jsonPayload)).not.toThrow();
     }
 
     htmlClear();
@@ -42,35 +45,28 @@ describe("html validate", () => {
     runValidateHtmlTests([
       {
         html: `
-          <div class="w-store-cfg"
-            w-store="basic"></div>
+          <div class="w-storeCfg"
+            w-store="basic"
+            w-sync="xrange"></div>
+          <div class="w-storeCfg"
+            w-store="basic"
+            w-sync="xrange"></div>
         `,
-        errMsg: "sync"
+        errMsg: ["unique"]
       },
       {
         html: `
-          <div class="w-store-cfg"
-            w-store="basic"
-            w-sync="xRange"></div>
-          <div class="w-store-cfg"
-            w-store="basic"
-            w-sync="xRange"></div>
-        `,
-        errMsg: "unique"
-      },
-      {
-        html: `
-          <div class="w-store-cfg"
+          <div class="w-storeCfg"
             w-store="basic"
             w-sync="x"></div>
         `,
-        errMsg: "Unknown sync"
+        errMsg: ["type", "graphProp"]
       },
       {
         html: `
-          <div class="w-store-cfg"
+          <div class="w-storeCfg"
             w-store="basic"
-            w-sync="xRange"></div>
+            w-sync="xrange"></div>
         `,
       },
     ]);
@@ -80,27 +76,40 @@ describe("html validate", () => {
     runValidateHtmlTests([
       {
         html: `
-          <div class="w-graph-cfg"
+          <div class="w-graphCfg"
                w-id="1"></div>
         `,
-        errMsg: "store"
+        errMsg: ["attribute", "store"]
       },
       {
         html: `
-          <div class="w-graph-cfg"
+          <div class="w-graphCfg"
                w-id="1"
                w-store="basic"></div>
-          <div class="w-graph-cfg"
+          <div class="w-graphCfg"
                w-id="1"
                w-store="basic"></div>
         `,
-        errMsg: "unique"
+        errMsg: ["unique"]
       },
       {
         html: `
-          <div class="w-graph-cfg"
+          <div class="w-graphCfg"
                w-id="1"
                w-store="basic"
+               w-vars="R0"></div>
+        `,
+        errMsg: ["type", "variables"]
+      },
+      {
+        html: `
+          <div class="w-graphCfg"
+               w-id="1"
+               w-store="basic"
+               w-vars="R, I"></div>
+          <div class="w-graphCfg"
+               w-id="1"
+               w-store="basic:1"
                w-vars="R, I"></div>
         `
       },
@@ -111,17 +120,17 @@ describe("html validate", () => {
     runValidateHtmlTests([
       {
         html: `
-          <div class="w-par-cfg"
+          <div class="w-parCfg"
                w-store="basic"
                w-par="beta"
                w-val="4"
                w-step="0.1"></div>
         `,
-        errMsg: "min"
+        errMsg: ["attribute", "min"]
       },
       {
         html: `
-          <div class="w-par-cfg"
+          <div class="w-parCfg"
                w-store="basic"
                w-par="beta"
                w-val="four"
@@ -129,28 +138,40 @@ describe("html validate", () => {
                w-max="6"
                w-step="0.1"></div>
         `,
-        errMsg: "number"
+        errMsg: ["type", "number"]
       },
       {
         html: `
-          <div class="w-par-cfg"
+          <div class="w-parCfg"
+               w-store="basic"
+               w-par="b"
+               w-val="4"
+               w-min="1"
+               w-max="6"
+               w-step="0.1"></div>
+        `,
+        errMsg: ["type", "parameter"]
+      },
+      {
+        html: `
+          <div class="w-parCfg"
                w-store="basic"
                w-par="beta"
                w-val="4"
                w-min="1"
                w-max="6"></div>
-          <div class="w-par-cfg"
+          <div class="w-parCfg"
                w-store="basic"
                w-par="beta"
                w-val="4"
                w-min="1"
                w-max="6"></div>
         `,
-        errMsg: "unique"
+        errMsg: ["unique"]
       },
       {
         html: `
-          <div class="w-par-cfg"
+          <div class="w-parCfg"
                w-store="basic"
                w-par="beta"
                w-val="4"
@@ -164,7 +185,7 @@ describe("html validate", () => {
 
   test("pars", () => {
     const parCfg = `
-      <div class="w-par-cfg"
+      <div class="w-parCfg"
            w-store="basic"
            w-par="beta"
            w-val="4"
@@ -178,13 +199,20 @@ describe("html validate", () => {
           ${parCfg}
           <div class="w-par" w-store="basic"></div>
         `,
-        errMsg: "par"
+        errMsg: ["attribute", "par"]
       },
       {
         html: `
           <div class="w-par" w-store="basic" w-par="beta"></div>
         `,
-        errMsg: "par-cfg"
+        errMsg: ["corresponding", "parCfg"]
+      },
+      {
+        html: `
+          ${parCfg}
+          <div class="w-par" w-store="basic" w-par="b"></div>
+        `,
+        errMsg: ["type", "parameter"]
       },
       {
         html: `
@@ -197,7 +225,7 @@ describe("html validate", () => {
   
   test("plot", () => {
     const graphCfg = `
-      <div class="w-graph-cfg"
+      <div class="w-graphCfg"
            w-id="1"
            w-store="basic"
            w-vars="R, I"></div>
@@ -207,57 +235,26 @@ describe("html validate", () => {
         html: `
           <div class="w-plot" w-vars="S, I"></div>
         `,
-        errMsg: "attributes"
+        errMsg: ["attribute", "store"]
       },
       {
         html: `
-          <div class="w-plot" w-id="1"></div>
+          <div class="w-plot" w-store="basic" w-vars="R0, S"></div>
         `,
-        errMsg: "graph-cfg"
+        errMsg: ["type", "variable"]
+      },
+      {
+        html: `
+          <div class="w-plot" w-store="basic" w-id="1"></div>
+        `,
+        errMsg: ["corresponding", "graphCfg"]
       },
       {
         html: `
           ${graphCfg}
-          <div class="w-plot" w-id="1"></div>
+          <div class="w-plot" w-store="basic" w-id="1"></div>
           <div class="w-plot" w-store="basic" w-vars="S, I"></div>
         `
-      },
-    ]);
-  });
-
-  test("validateVars for graph cfg", () => {
-    const graphCfg = `
-      <div class="w-graph-cfg"
-           w-id="1"
-           w-store="basic"
-           w-vars="R0, S"></div>
-    `;
-    runValidateVarsTest([
-      {
-        vars: ["S", "I"],
-        html: graphCfg,
-        errMsg: "model variable"
-      },
-      {
-        vars: ["R0", "S", "I"],
-        html: graphCfg,
-      },
-    ]);
-  });
-
-  test("validateVars for plot", () => {
-    const plot = `
-      <div class="w-plot" w-store="basic" w-vars="R0, S"></div>
-    `;
-    runValidateVarsTest([
-      {
-        vars: ["S", "I"],
-        html: plot,
-        errMsg: "model variable"
-      },
-      {
-        vars: ["R0", "S", "I"],
-        html: plot,
       },
     ]);
   });
