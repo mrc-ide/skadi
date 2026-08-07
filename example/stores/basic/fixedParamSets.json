@@ -3,7 +3,7 @@
     "user": {
       "sigma": 2
     },
-    "style": {
+    "styles": {
       "stroke": "dot",
       "color": "green"
     }

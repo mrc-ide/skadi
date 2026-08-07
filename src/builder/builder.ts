@@ -1,6 +1,7 @@
 import path from "node:path";
 import { processArgs } from "./args";
 import fs from "node:fs";
+import { validateJsonSchemas } from "./schema";
 
 const { configPath } = processArgs();
 
@@ -9,6 +10,24 @@ const clearAndMakeDir = (path: string) => {
     fs.rmSync(path, { recursive: true });
   }
   fs.mkdirSync(path);
+};
+
+const getModelJson = async (storePath: string) => {
+  const model = fs.readFileSync(path.resolve(storePath, "model.R"))
+    .toString()
+    .split("\n");
+
+  const res = await fetch("http://localhost:8001/compile2", {
+    method: "POST",
+    body: JSON.stringify({ model }),
+    headers: { "content-type": "application/json" }
+  });
+  const resJson = await res.json();
+
+  return {
+    generator: resJson.data.model,
+    metadata: resJson.data.metadata,
+  };
 };
 
 const main = async () => {
@@ -33,6 +52,14 @@ const main = async () => {
 
     fs.mkdirSync(destStorePath);
 
+    const modelJson = await getModelJson(storePath);
+    fs.writeFileSync(
+      path.resolve(destStorePath, `model.json`),
+      JSON.stringify(modelJson)
+    );
+
+    validateJsonSchemas(storePath, modelJson.metadata);
+
     fs.cpSync(
       path.resolve(storePath, "config.json"),
       path.resolve(destStorePath, "config.json")
@@ -42,24 +69,6 @@ const main = async () => {
       path.resolve(storePath, "fixedParamSets.json"),
       path.resolve(destStorePath, "fixedParamSets.json")
     );
-
-    const model = fs.readFileSync(path.resolve(storesPath, store, "model.R"))
-      .toString()
-      .split("\n");
-
-    const res = await fetch("http://localhost:8001/compile2", {
-      method: "POST",
-      body: JSON.stringify({ model }),
-      headers: { "content-type": "application/json" }
-    });
-    const resJson = await res.json();
-
-    const modelJson = {
-      generator: resJson.data.model,
-      metadata: resJson.data.metadata,
-    }
-
-    fs.writeFileSync(path.resolve(destStorePath, `model.json`), JSON.stringify(modelJson));
   });
 };
 

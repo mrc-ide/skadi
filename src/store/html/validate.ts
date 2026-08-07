@@ -26,9 +26,10 @@ const validateSingleAttrs = (attrsSchema: AttrSchema[], el: Element, json: JsonP
     // type
     const type: AttrType = a.type || "string";
     const validator = typeValidators[type];
+    const { metadata } = json.model;
     const isValid = a.isArray
-      ? all(splitComma(val)!.map(v => validator(v, json)))
-      : validator(val, json);
+      ? all(splitComma(val)!.map(v => validator(v, metadata)))
+      : validator(val, metadata);
     if (!isValid) {
       const typeMsg = a.isArray
         ? `array of ${type}s`
