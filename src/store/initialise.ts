@@ -1,11 +1,11 @@
-import { createSignal } from "solid-js";
-import { Fixed, Form, Store } from "./types";
+import { Fixed, Store } from "./types";
 import { getGraphDataStore } from "./graph/data";
 import { getGraphStateStore } from "./graph/state";
 import { getParamsStore } from "./params/state";
 import { JsonPayload } from "../schemas/json/types";
 import { validateHtml } from "../schemas/html/validate";
 import { parseAndProcessHtml } from "../schemas/html/parseAndProcess";
+import { getFormsStore } from "./forms/state";
 
 export const getInitialisedStore = (
   storeName: string,
@@ -20,16 +20,14 @@ export const getInitialisedStore = (
     html: parseAndProcessHtml(storeName, jsonPayload),
   };
 
-  const [form, setForm] = createSignal<Form>({});
-
+  const formsStore = getFormsStore(fixed);
   const paramsStore = getParamsStore(fixed);
   const graphDataStore = getGraphDataStore(fixed, paramsStore.params());
   const graphStateStore = getGraphStateStore(fixed, graphDataStore.graphData());
 
   const store: Store = {
     fixed,
-    form,
-    setForm,
+    ...formsStore,
     ...paramsStore,
     ...graphDataStore,
     ...graphStateStore,

@@ -1,7 +1,7 @@
 import path from "node:path";
 import { processArgs } from "./args";
 import fs from "node:fs";
-import { validateJsonSchema } from "../schemas/json/validate";
+import { validateFormAssets, validateFormDefault, validateJsonSchema } from "../schemas/json/validate";
 import { getJsonSchema, JsonFileName } from "../schemas/json/schema";
 
 const { configPath } = processArgs();
@@ -31,7 +31,7 @@ const getModelJson = async (storePath: string) => {
   };
 };
 
-const getJson = async (storePath: string, fileName: JsonFileName) => {
+const getJson = (storePath: string, fileName: JsonFileName) => {
   const filePath = path.resolve(storePath, `${fileName}.json`);
   const fileContents = fs.readFileSync(filePath).toString();
   return JSON.parse(fileContents);
@@ -66,16 +66,35 @@ const main = async () => {
 
     const model = await getModelJson(storePath);
     const { metadata } = model;
+    validateJsonSchema(model, getJsonSchema("model"), metadata);
     writeJson(destStorePath, "model", model);
-    validateJsonSchema(destStorePath, model, getJsonSchema("model"), metadata);
 
-    const config = await getJson(storePath, "config");
+    const config = getJson(storePath, "config");
+    validateJsonSchema(config, getJsonSchema("config"), metadata);
     writeJson(destStorePath, "config", config);
-    validateJsonSchema(destStorePath, config, getJsonSchema("config"), metadata);
 
-    const fixedParamSets = await getJson(storePath, "fixedParamSets");
+    const fixedParamSets = getJson(storePath, "fixedParamSets");
+    validateJsonSchema(fixedParamSets, getJsonSchema("fixedParamSets"), metadata);
     writeJson(destStorePath, "fixedParamSets", fixedParamSets);
-    validateJsonSchema(destStorePath, fixedParamSets, getJsonSchema("fixedParamSets"), metadata);
+
+    const formsPath = path.resolve(storePath, "forms.json");
+    const formAssetsPath = path.resolve(storePath, "forms.json");
+    if (fs.existsSync(formsPath)) {
+      if (!fs.existsSync(formAssetsPath)) {
+        throw new Error(`Expected folder ${formAssetsPath} as ${formsPath} exists`);
+      }
+      const forms = getJson(storePath, "forms");
+      validateJsonSchema(forms, getJsonSchema("forms"), metadata);
+      validateFormDefault(forms);
+      validateFormAssets(storePath, forms, metadata);
+
+      writeJson(destStorePath, "forms", forms);
+      fs.cpSync(
+        path.resolve(storePath, "formAssets"),
+        path.resolve(destStorePath, "formAssets"),
+        { recursive: true }
+      );
+    }
   });
 };
 

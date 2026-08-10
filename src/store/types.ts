@@ -2,7 +2,7 @@ import { ContinuousGeneratorODE, DiscreteGenerator, NamedResult } from "@reside-
 import { Lines, ScatterPoints } from "@reside-ic/skadi-chart"
 import { Accessor, Setter } from "solid-js"
 import { GraphConfig, ParsedAndProcessedHtml } from "../schemas/html/types"
-import { JsonPayload, Params } from "../schemas/json/types"
+import { FormIdLabel, JsonPayload, Params } from "../schemas/json/types"
 
 export type Generator =
   | DiscreteGenerator<any, any, any>
@@ -14,7 +14,7 @@ export type PlotData = {
   points: ScatterPoints<Metadata>,
 }
 
-export type Form = Record<string, any>
+export type Form = Record<string, FormIdLabel>
 
 export type Range = [number, number]
 export type DataWithRange = {
@@ -49,7 +49,7 @@ export type Fixed = {
   html: ParsedAndProcessedHtml,
 }
 
-export type ProduceParam = (p: Params) => void
+export type Producer<T> = (fn: (x: T) => void) => void;
 
 export type Store = {
   // will be initialised once at the start
@@ -58,14 +58,14 @@ export type Store = {
 
   // updated via user form if any
   form: Accessor<Form>,
-  setForm: Setter<Form>,
+  setForm: Producer<Form>,
 
   // |
   // v
 
   // updated when form or user input updates
   params: Accessor<Params>,
-  setParams: (fn: ProduceParam) => void,
+  setParams: Producer<Params>,
 
   // |
   // v

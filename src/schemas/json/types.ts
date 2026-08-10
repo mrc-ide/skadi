@@ -10,14 +10,8 @@ export type JsonType =
   | { type: "variable" }
   | { type: "parameter" }
   | { type: "array", items: JsonType }
-  | {
-    type: "object",
-    properties: ObjectProperty
-  }
-  | {
-    type: "objectStatic",
-    properties: StaticObjectProperty[]
-  }
+  | { type: "object", properties: ObjectProperty }
+  | { type: "objectStatic", properties: StaticObjectProperty[] }
   | { type: "oneOf", possibilities: JsonType[] }
   | { type: "stringUnion", values: string[] }
 
@@ -68,3 +62,6 @@ export type Config = JsonPayload["config"]
 export type LineStyle = NonNullable<JsonPayload["config"]["styles"]>[string]
 export type LineStyles = NonNullable<JsonPayload["config"]["styles"]>
 export type Stroke = NonNullable<LineStyle["stroke"]>
+export type FormConfig = JsonPayload["forms"][number]
+export type FormField = FormConfig["fields"][number]
+export type FormIdLabel = FormField["options"][number]
