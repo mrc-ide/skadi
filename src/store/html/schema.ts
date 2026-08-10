@@ -1,19 +1,19 @@
-import { GraphConfig, graphConfigKeys, JsonPayload, Range } from "../types";
+import { GraphConfig, graphConfigKeys, ModelMetadata, Range } from "../types";
 import { Prettify, splitComma } from "../utils";
 
-const isString = (s: string, _json: JsonPayload) => !!s
-const isNumber = (s: string, _json: JsonPayload) => !isNaN(parseFloat(s));
-const isBoolean = (s: string, _json: JsonPayload) =>
+const isString = (s: string, _metadata: ModelMetadata) => !!s
+const isNumber = (s: string, _metadata: ModelMetadata) => !isNaN(parseFloat(s));
+const isBoolean = (s: string, _metadata: ModelMetadata) =>
   s === "" || s.toLowerCase() === "true" || s.toLowerCase() === "false";
-const isGraphProp = (s: string, _json: JsonPayload) => graphConfigKeys.includes(s as any);
-const isVariable = (s: string, json: JsonPayload) =>
-  json.model.metadata.variables.map(v => v.name).includes(s as any);
-const isParameter = (s: string, json: JsonPayload) =>
-  json.model.metadata.parameters.map(v => v.name).includes(s as any);
-const isRange = (s: string, json: JsonPayload) => {
+const isGraphProp = (s: string, _metadata: ModelMetadata) => graphConfigKeys.includes(s as any);
+const isVariable = (s: string, metadata: ModelMetadata) =>
+  metadata.variables.map(v => v.name).includes(s as any);
+const isParameter = (s: string, metadata: ModelMetadata) =>
+  metadata.parameters.map(v => v.name).includes(s as any);
+const isRange = (s: string, metadata: ModelMetadata) => {
   const vals = splitComma(s);
   if (vals?.length !== 2) return false;
-  return isNumber(vals[0], json) && isNumber(vals[1], json);
+  return isNumber(vals[0], metadata) && isNumber(vals[1], metadata);
 };
 
 export const typeValidators = {
