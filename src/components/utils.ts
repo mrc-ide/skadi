@@ -1,4 +1,5 @@
-import { LineStyle, ParameterValue, PlotData, Stroke } from "../store/types";
+import { LineStyle, ParamValue, Stroke } from "../schemas/json/types";
+import { PlotData } from "../store/types";
 
 export const strokeToStrokeDashArray: Record<Stroke, string> = {
   solid: "",
@@ -10,7 +11,7 @@ export const strokeToStrokeDashArray: Record<Stroke, string> = {
 export const getLine = (
   v: string,
   times: number[],
-  particleValues: Record<string, ParameterValue[]>,
+  particleValues: Record<string, ParamValue[]>,
   style?: LineStyle | undefined,
 ) => {
   const line: PlotData["lines"][number] = { points: [], style: {} };

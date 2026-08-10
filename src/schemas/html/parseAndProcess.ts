@@ -1,7 +1,20 @@
-import { GraphConfig, GraphHtmlMetadata, JsonPayload } from "../types";
-import { concatIfNotIn, objFrom, splitComma, zip } from "../utils";
-import { AttrSchema, AttrType, ParsedHtml, schemas, typeParsers } from "./schema";
+import { concatIfNotIn, objFrom, splitComma, zip } from "../../utils";
+import { Range } from "../../utils/types";
+import { JsonPayload } from "../json/types";
+import { AttrSchema, graphConfigKeys, htmlSchemas } from "./schema";
+import { GraphConfig, GraphHtmlMetadata, ParsedAndProcessedHtml, ParsedHtml } from "./types";
 import { findSchema, getAttr, getEls, setAttr } from "./utils";
+
+const parseNumber = (s: string) => parseFloat(s);
+export const typeParsers = {
+  string: (s: string) => s,
+  number: parseNumber,
+  boolean: (s: string) => s === "" || s.toLowerCase() === "true",
+  graphProp: (s: string) => graphConfigKeys.find(g => g === s)!,
+  variable: (s: string) => s,
+  parameter: (s: string) => s,
+  range: (s: string) => splitComma(s)!.map(parseNumber) as Range,
+} as const;
 
 const parseSingleAttrs = (attrsSchema: AttrSchema[], el: Element) => {
   return objFrom(
@@ -11,24 +24,26 @@ const parseSingleAttrs = (attrsSchema: AttrSchema[], el: Element) => {
       const val = getAttr(a.name, el);
       if (val === null || val === undefined) return;
 
-      const type: AttrType = a.type || "string";
-      const parser = typeParsers[type];
-      return a.isArray
-        ? splitComma(val)!.map(v => parser(v))
-        : parser(val);
+      if (a.type === "array") {
+        const parser = typeParsers[a.items.type];
+        return splitComma(val)!.map(v => parser(v));
+      } else {
+        const parser = typeParsers[a.type];
+        return parser(val);
+      }
     }
   );
 };
 
-export const processHtml = (store: string, json: JsonPayload) => {
+export const parseAndProcessHtml = (store: string, json: JsonPayload): ParsedAndProcessedHtml => {
   const parsed = objFrom(
-    schemas,
-    scheme => scheme.class,
-    scheme => {
-      return getEls(scheme.class, { store }).map(el => {
-        const attrSchema = "attrs" in scheme
-          ? scheme.attrs
-          : findSchema(scheme, el)!;
+    htmlSchemas,
+    schema => schema.class,
+    schema => {
+      return getEls(schema.class, { store }).map(el => {
+        const attrSchema = "attrs" in schema
+          ? schema.attrs
+          : findSchema(schema, el)!;
         return parseSingleAttrs(attrSchema, el);
       });
     }

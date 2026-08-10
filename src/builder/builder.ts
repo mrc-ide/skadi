@@ -1,7 +1,8 @@
 import path from "node:path";
 import { processArgs } from "./args";
 import fs from "node:fs";
-import { validateJsonSchemas } from "./schema";
+import { validateJsonSchema } from "../schemas/json/validate";
+import { getJsonSchema, JsonFileName } from "../schemas/json/schema";
 
 const { configPath } = processArgs();
 
@@ -30,6 +31,17 @@ const getModelJson = async (storePath: string) => {
   };
 };
 
+const getJson = async (storePath: string, fileName: JsonFileName) => {
+  const filePath = path.resolve(storePath, `${fileName}.json`);
+  const fileContents = fs.readFileSync(filePath).toString();
+  return JSON.parse(fileContents);
+};
+
+const writeJson = async (destPath: string, fileName: JsonFileName, content: any) => {
+  const filePath = path.resolve(destPath, `${fileName}.json`);
+  fs.writeFileSync(filePath, JSON.stringify(content));
+};
+
 const main = async () => {
   const storesPath = path.resolve(configPath, "stores")
   const stores = fs.readdirSync(storesPath, { recursive: false }) as string[];
@@ -52,23 +64,18 @@ const main = async () => {
 
     fs.mkdirSync(destStorePath);
 
-    const modelJson = await getModelJson(storePath);
-    fs.writeFileSync(
-      path.resolve(destStorePath, `model.json`),
-      JSON.stringify(modelJson)
-    );
+    const model = await getModelJson(storePath);
+    const { metadata } = model;
+    writeJson(destStorePath, "model", model);
+    validateJsonSchema(destStorePath, model, getJsonSchema("model"), metadata);
 
-    validateJsonSchemas(storePath, modelJson.metadata);
+    const config = await getJson(storePath, "config");
+    writeJson(destStorePath, "config", config);
+    validateJsonSchema(destStorePath, config, getJsonSchema("config"), metadata);
 
-    fs.cpSync(
-      path.resolve(storePath, "config.json"),
-      path.resolve(destStorePath, "config.json")
-    );
-
-    fs.cpSync(
-      path.resolve(storePath, "fixedParamSets.json"),
-      path.resolve(destStorePath, "fixedParamSets.json")
-    );
+    const fixedParamSets = await getJson(storePath, "fixedParamSets");
+    writeJson(destStorePath, "fixedParamSets", fixedParamSets);
+    validateJsonSchema(destStorePath, fixedParamSets, getJsonSchema("fixedParamSets"), metadata);
   });
 };
 

@@ -1,4 +1,4 @@
-import { addIfNotIn, objForEach } from "../utils";
+import { addIfNotIn, objForEach, tryResult } from "../../utils";
 import { Attribute, attributes, AttrSchema, ClassName } from "./schema";
 
 // helper function to add `w-`
@@ -148,12 +148,7 @@ export const findSchema = <
   T extends { oneOf: AttrSchema[][] }
 >(scheme: T, el: Element) => {
   return scheme.oneOf.find(s => {
-    try {
-      expectSchema(s, el, false)
-    } catch {
-      return false;
-    };
-    return true;
+    return tryResult(() => expectSchema(s, el, false)).success;
   });
 };
 
@@ -163,11 +158,3 @@ export const attrEq = (a: Attribute) =>
 export const attrsEq = (attrs: Attribute[]) =>
   (el1: Element, el2: Element) =>
     attrs.reduce((agg, a) => agg && attrEq(a)(el1, el2), true);
-
-export const getStoresInPage = () => {
-  const els = Array.from(document.querySelectorAll(`[${w("store")}]`)!);
-  return els.reduce(
-    (stores, el) => addIfNotIn(stores, getAttr("store", el)!),
-    [] as string[]
-  );
-};

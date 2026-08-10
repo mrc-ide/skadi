@@ -1,7 +1,9 @@
 import { createSignal } from "solid-js";
-import { DataWithRange, Fixed, GraphConfig, graphConfigKeys, GraphData, GraphSignal, GraphState, Range } from "../types";
+import { DataWithRange, Fixed, GraphData, GraphSignal, GraphState, Range } from "../types";
 import { getXYRanges } from "./utils";
-import { objAssignIfTruthy, objFilter, objKeys, objMergeAndAssignKey } from "../utils";
+import { objAssignIfTruthy, objFilter, objKeys, objMergeAndAssignKey } from "../../utils";
+import { graphConfigKeys } from "../../schemas/html/schema";
+import { GraphConfig } from "../../schemas/html/types";
 
 const getGraphRanges = (
   { xrange, yrange, data }: DataWithRange,
@@ -33,7 +35,7 @@ const createGraphStates = (
     const [rangeUpdated, setRangeUpdated] = createSignal(false);
 
     // default to all vars if not specified in html
-    const allVars = fixed.json.modelMetadata.variables.map(v => v.name);
+    const allVars = fixed.json.model.metadata.variables.map(v => v.name);
     const vars = g.config.vars ?? allVars;
     const { xrange, yrange } = getGraphRanges(graphData, vars, fixed);
 

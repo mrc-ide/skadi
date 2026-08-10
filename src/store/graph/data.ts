@@ -1,9 +1,10 @@
 import { System } from "@reside-ic/dust2";
-import { DataWithRange, Fixed, GraphData, ParameterValue, Params } from "../types";
+import { DataWithRange, Fixed, GraphData } from "../types";
 import { getXYRanges } from "./utils";
 import { createSignal } from "solid-js";
+import { Params, ParamValues } from "../../schemas/json/types";
 
-export const calculateGraphData = (fixed: Fixed, params: Record<string, ParameterValue>): DataWithRange => {
+export const calculateGraphData = (fixed: Fixed, params: ParamValues): DataWithRange => {
   const { startTime, endTime, particles, dt } = fixed.json.config;
   const sys = System.createODE(
     fixed.generator as any,

@@ -1,0 +1,78 @@
+import { AttrSchemaSatisfies, HtmlSchemaSatisfies } from "./types";
+
+export const graphConfigSchema = [
+  { name: "vars", optional: true, type: "array", items: { type: "variable"} },
+  { name: "xrange", optional: true, type: "range" },
+  { name: "yrange", optional: true, type: "range" },
+  { name: "ylog", optional: true, type: "boolean" },
+] as const satisfies AttrSchemaSatisfies[];
+
+export const htmlSchemas = [
+  {
+    class: "storeCfg",
+    uniqueBy: ["store"],
+    attrs: [
+      { name: "store", type: "string" },
+      { name: "sync", optional: true, type: "array", items: { type: "graphProp" } },
+    ]
+  },
+  {
+    class: "graphCfg",
+    uniqueBy: ["id", "store"],
+    attrs: [
+      { name: "store", type: "string" },
+      { name: "id", type: "string" },
+      ...graphConfigSchema,
+    ]
+  },
+  {
+    class: "parCfg",
+    uniqueBy: ["store", "par"],
+    attrs: [
+      { name: "store", type: "string" },
+      { name: "par", type: "parameter" },
+      { name: "val", type: "number" },
+      { name: "min", type: "number" },
+      { name: "max", type: "number" },
+      { name: "step", optional: true, type: "number" },
+    ]
+  },
+  {
+    class: "par",
+    attrs: [
+      { name: "store", type: "string" },
+      { name: "par", type: "parameter" },
+    ]
+  },
+  {
+    class: "plot",
+    oneOf: [
+      [
+        { name: "store", type: "string" },
+        { name: "id", type: "string" },
+      ],
+      [
+        { name: "store", type: "string" },
+        ...graphConfigSchema,
+      ]
+    ]
+  },
+] as const satisfies HtmlSchemaSatisfies[];
+export type HtmlSchemas = typeof htmlSchemas;
+
+export const classNames = htmlSchemas.map(s => s.class);
+export type ClassName = (typeof classNames)[number]
+
+export const attributes = htmlSchemas.flatMap(
+  scheme => "attrs" in scheme
+    ? scheme.attrs.map(a => a.name)
+    : scheme.oneOf.flatMap(attrs => attrs.map(a => a.name))
+);
+export type Attribute =
+  | (typeof attributes)[number]
+  | "error"
+  | "storeid"
+
+export type AttrSchema = AttrSchemaSatisfies<Attribute>
+
+export const graphConfigKeys = graphConfigSchema.map(g => g.name);
