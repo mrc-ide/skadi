@@ -5,7 +5,7 @@ import { objAssignIfTruthy, objFilter, objKeys, objMergeAndAssignKey } from "../
 import { graphConfigKeys } from "../../schemas/html/schema";
 import { GraphConfig } from "../../schemas/html/types";
 
-const getGraphRanges = (
+export const getGraphRanges = (
   { xrange, yrange, data }: DataWithRange,
   vars: string[],
   { json, html }: Fixed

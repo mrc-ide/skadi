@@ -8,6 +8,7 @@ type BaseAttrType =
   | { type: "graphProp" }
   | { type: "variable" }
   | { type: "parameter" }
+  | { type: "formId" }
 
 export type AttrType =
   | BaseAttrType
@@ -28,7 +29,7 @@ export type HtmlSchemaSatisfies = {
 // ---------------------------------------------------------- //
 
 type GetAttrType<T extends AttrType> =
-  T["type"] extends "string" | "parameter" | "variable" ? string :
+  T["type"] extends "string" | "parameter" | "variable" | "formId" ? string :
   T["type"] extends "number" ? number :
   T["type"] extends "boolean" ? boolean :
   T["type"] extends "graphProp" ? (typeof graphConfigSchema)[number]["name"] :

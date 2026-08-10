@@ -93,6 +93,38 @@ export const jsonSchemas = [
         styles
       ]
     }
+  },
+  {
+    name: "forms",
+    type: "array",
+    items: {
+      type: "objectStatic",
+      properties: [
+        { key: "id", type: "string" },
+        {
+          key: "fields",
+          type: "array",
+          items: {
+            type: "objectStatic",
+            properties: [
+              { key: "label", type: "string" },
+              { key: "default", type: "string" },
+              {
+                key: "options",
+                type: "array",
+                items: {
+                  type: "objectStatic",
+                  properties: [
+                    { key: "id", type: "string" },
+                    { key: "label", type: "string" },
+                  ]
+                }
+              },
+            ]
+          }
+        }
+      ]
+    }
   }
 ] as const satisfies JsonSchemaSatisfies[];
 export type JsonSchemas = typeof jsonSchemas;
@@ -101,3 +133,8 @@ export type JsonFileName = JsonSchemas[number]["name"];
 
 export const getJsonSchema = (findName: JsonFileName) =>
   jsonSchemas.find(({ name }) => name === findName)!;
+
+export const formAssetType = {
+  type: "object",
+  properties: parameterValue,
+} as const satisfies JsonType;

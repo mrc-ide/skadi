@@ -1,5 +1,5 @@
 import { createSignal } from "solid-js";
-import { Fixed, ProduceParam } from "../types";
+import { Fixed, Producer } from "../types";
 import { Params } from "../../schemas/json/types";
 import { deepCopy, objFrom } from "../../utils";
 
@@ -15,7 +15,7 @@ export const getParamsStore = (fixed: Fixed) => {
   const [params, setParams] = createSignal<Params>(initialParams);
   // the produce interface works better for updating params, i.e. make a
   // copy of the object and modify
-  const setParamsProduce = (fn: ProduceParam) => {
+  const setParamsProduce: Producer<Params> = fn => {
     const paramsCopy = deepCopy(params());
     fn(paramsCopy);
     setParams(paramsCopy);

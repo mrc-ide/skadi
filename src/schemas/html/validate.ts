@@ -1,23 +1,25 @@
 import { all, callIfDuplicate, isNullish, objFromVals, splitComma } from "../../utils";
-import { JsonPayload, ModelMetadata } from "../json/types";
+import { JsonPayload } from "../json/types";
 import { Attribute, AttrSchema, ClassName, graphConfigKeys, htmlSchemas } from "./schema";
 import { attrsEq, error, expectAttrs, expectSchema, findSchema, getAttr, getEl, getEls, w } from "./utils";
 
-const isString = (s: string, _metadata: ModelMetadata) => !!s
-const isNumber = (s: string, _metadata: ModelMetadata) => !isNaN(parseFloat(s));
-const isBoolean = (s: string, _metadata: ModelMetadata) =>
+const isString = (s: string, _json: JsonPayload) => !!s
+const isNumber = (s: string, _json: JsonPayload) => !isNaN(parseFloat(s));
+const isBoolean = (s: string, _json: JsonPayload) =>
   s === "" || s.toLowerCase() === "true" || s.toLowerCase() === "false";
-const isGraphProp = (s: string, _metadata: ModelMetadata) =>
+const isGraphProp = (s: string, _json: JsonPayload) =>
   graphConfigKeys.includes(s as any);
-const isVariable = (s: string, metadata: ModelMetadata) =>
-  metadata.variables.map(v => v.name).includes(s as any);
-const isParameter = (s: string, metadata: ModelMetadata) =>
-  metadata.parameters.map(v => v.name).includes(s as any);
-const isRange = (s: string, metadata: ModelMetadata) => {
+const isVariable = (s: string, json: JsonPayload) =>
+  json.model.metadata.variables.map(v => v.name).includes(s as any);
+const isParameter = (s: string, json: JsonPayload) =>
+  json.model.metadata.parameters.map(v => v.name).includes(s as any);
+const isRange = (s: string, json: JsonPayload) => {
   const vals = splitComma(s);
   if (vals?.length !== 2) return false;
-  return isNumber(vals[0], metadata) && isNumber(vals[1], metadata);
+  return isNumber(vals[0], json) && isNumber(vals[1], json);
 };
+const isFormId = (s: string, json: JsonPayload) =>
+  json.forms.map(f => f.id).includes(s as any);
 
 export const typeValidators = {
   string: isString,
@@ -27,6 +29,7 @@ export const typeValidators = {
   variable: isVariable,
   parameter: isParameter,
   range: isRange,
+  formId: isFormId,
 } as const;
 
 const validateStoreAttr = () => {
@@ -45,15 +48,14 @@ const validateSingleAttrs = (attrsSchema: AttrSchema[], el: Element, json: JsonP
       );
     }
 
-    const { metadata } = json.model;
     const status = { valid: true, typeMsg: "" };
     if (a.type === "array") {
       const validator = typeValidators[a.items.type];
-      status.valid = all(splitComma(val)!.map(v => validator(v, metadata)))
+      status.valid = all(splitComma(val)!.map(v => validator(v, json)))
       if (!status.valid) status.typeMsg = `array of ${a.items.type}`;
     } else {
       const validator = typeValidators[a.type];
-      status.valid = validator(val!, metadata);
+      status.valid = validator(val!, json);
       if (!status.valid) status.typeMsg = a.type;
     }
 

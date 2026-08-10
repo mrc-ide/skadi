@@ -1,7 +1,8 @@
 import path from "node:path";
-import { JsonType, ModelMetadata } from "./types";
-import { isNullish, objForEach, tryResult } from "../../utils";
-import { JsonSchemas } from "./schema";
+import fs from "node:fs";
+import { FormConfig, JsonType, ModelMetadata } from "./types";
+import { isNullish, iterate, objForEach, tryResult } from "../../utils";
+import { formAssetType, JsonSchemas } from "./schema";
 
 const typeValidators = {
   string: (x: any, _metadata: ModelMetadata) => typeof x === "string",
@@ -22,7 +23,7 @@ const error = (msg: string, path: string[]) => {
   throw new Error(errMsg);
 };
 
-const validateJsonType = (
+export const validateJsonType = (
   json: any,
   jsonType: JsonType,
   path: string[],
@@ -81,11 +82,46 @@ const validateJsonType = (
 };
 
 export const validateJsonSchema = (
-  storePath: string,
   json: any,
   schema: JsonSchemas[number],
   metadata: ModelMetadata,
 ) => {
-  const filePath = path.resolve(storePath, `${schema.name}.json`);
-  validateJsonType(json, schema, [`(${filePath})`], metadata);
+  validateJsonType(json, schema, [`(${schema.name}.json)`], metadata);
+};
+
+export const validateFormDefault = (forms: FormConfig[]) => {
+  forms.forEach((fg, fgIdx) => {
+    fg.fields.forEach((f, fIdx) => {
+      if (!f.options.find(op => op.id === f.default)) {
+        error("default id does not exist in options", ["(forms.json)", `${fgIdx}`, `${fIdx}`]);
+      }
+    });
+  });
+};
+
+export const validateFormAssets = (
+  storePath: string,
+  forms: FormConfig[],
+  metadata: ModelMetadata
+) => {
+  const formAssetsPath = path.resolve(storePath, "formAssets");
+  let allFiles = fs.readdirSync(formAssetsPath);
+
+  const fieldIds = forms.flatMap(f => f.fields.map(f => f.options.map(op => op.id)));
+  iterate(...fieldIds, async (...args) => {
+    const fileName = args.slice(0, args.length / 2).join("__") + ".json";
+    const filePath = path.resolve(formAssetsPath, fileName);
+    allFiles = allFiles.filter(f => f !== fileName);
+
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`File ${filePath} not found`);
+    }
+    
+    const json = JSON.parse(fs.readFileSync(filePath).toString());
+    validateJsonType(json, formAssetType, [`(${fileName})`], metadata);
+  });
+
+  if (allFiles.length > 0) {
+    throw new Error(`Found extra files in ${formAssetsPath}: ${allFiles.join(", ")}`);
+  }
 };

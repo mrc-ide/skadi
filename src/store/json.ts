@@ -9,7 +9,7 @@ const getJson = async <T>(storeName: string, fileName: string): Promise<T> => {
 export const readJsonForStores = async (
   storeTypes: readonly string[]
 ): Promise<Record<string, JsonPayload>> => {
-  const jsonFiles = ["config", "model", "fixedParamSets"] as const;
+  const jsonFiles = ["config", "model", "fixedParamSets", "forms"] as const;
   const pArr: Promise<any>[][] = Array.from({ length: jsonFiles.length })
     .map(() => []);
 

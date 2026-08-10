@@ -1,0 +1,1 @@
+[{"id":"f1","fields":[{"label":"Country","options":[{"id":"uk","label":"UK"},{"id":"us","label":"US"}],"default":"uk"},{"label":"Month","options":[{"id":"1","label":"Jan"},{"id":"2","label":"Feb"}],"default":"2"}]},{"id":"f2","fields":[{"label":"Disease","options":[{"id":"hiv","label":"HIV"},{"id":"flu","label":"Influenza"}],"default":"flu"}]}]

@@ -8,6 +8,7 @@ import { JSX } from 'solid-js';
 import Reactivity from './components/Reactivity';
 import { getAttr, getEls } from './schemas/html/utils';
 import { objForEach } from './utils';
+import Form from './components/Form';
 
 type RenderFunc = (el: Element, getJsx: () => JSX.Element) => void
 
@@ -40,6 +41,17 @@ const renderPlotEls = (store: string, renderWithStore: RenderFunc) => {
   })
 };
 
+const renderFormEls = (store: string, renderWithStore: RenderFunc) => {
+  const els = getEls("form", { store });
+  return els.map(el =>  {
+   const props = {
+      store,
+      formId: getAttr("formid", el)!,
+    };
+    renderWithStore(el, () => <Form {...props}/>)
+  })
+};
+
 const main = async () => {
   objForEach(
     await getStores(),
@@ -54,6 +66,7 @@ const main = async () => {
       };
       renderParamSliderEls(store, renderWithStore);
       renderPlotEls(store, renderWithStore);
+      renderFormEls(store, renderWithStore);
       renderReactivityEls(store, renderWithStore);
     }
   );

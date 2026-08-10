@@ -57,6 +57,13 @@ export const htmlSchemas = [
       ]
     ]
   },
+  {
+    class: "form",
+    attrs: [
+      { name: "store", type: "string" },
+      { name: "formid", type: "formId" },
+    ]
+  },
 ] as const satisfies HtmlSchemaSatisfies[];
 export type HtmlSchemas = typeof htmlSchemas;
 
