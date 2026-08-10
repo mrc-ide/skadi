@@ -4,10 +4,10 @@ import './index.css'
 import { getStores } from './store'
 import ParamSlider from './components/ParamSlider';
 import Plot from './components/Plot';
-import { objForEach } from './store/utils';
-import { getAttr, getEls } from './store/html/utils';
 import { JSX } from 'solid-js';
 import Reactivity from './components/Reactivity';
+import { getAttr, getEls } from './schemas/html/utils';
+import { objForEach } from './utils';
 
 type RenderFunc = (el: Element, getJsx: () => JSX.Element) => void
 

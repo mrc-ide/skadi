@@ -3,6 +3,7 @@ import { useStore } from "../store";
 import { Chart } from "@reside-ic/skadi-chart";
 import { PlotData, Range } from "../store/types";
 import { getLine } from "./utils";
+import { LineStyles, ParamValue } from "../schemas/json/types";
 
 type RangeObj = { xrange: Range, yrange: Range }
 const rangeToExtent = (obj: RangeObj) => ({
@@ -23,18 +24,20 @@ const Plot: Component<{ store: string, id: string }> = props => {
     const plotData: PlotData = { lines: [], points: [] };
     const times = data.main.data.times;
     cfg.vars.forEach(v => {
-      const getLineForVar = getLine.bind(null, v, times);
+      const addLine = (x: Record<string, ParamValue[]>, styles: LineStyles | undefined) => {
+        const style = styles && styles[v];
+        plotData.lines.push(getLine(v, times, x, style));
+      };
 
       data.main.data.values.forEach(val => {
         const { styles } = store.fixed.json.config;
-        const style = styles && styles[v];
-        plotData.lines.push(getLineForVar(val, style));
+        addLine(val, styles);
       });
 
       data.static.forEach((s, i) => {
         s.data.values.forEach(val => {
-          const { style } = store.fixed.json.fixedParamSets[i];
-          plotData.lines.push(getLineForVar(val, style));
+          const { styles } = store.fixed.json.fixedParamSets[i];
+          addLine(val, styles);
         });
       });
     });

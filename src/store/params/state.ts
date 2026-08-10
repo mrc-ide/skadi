@@ -1,6 +1,7 @@
 import { createSignal } from "solid-js";
-import { Fixed, Params, ProduceParam } from "../types";
-import { deepCopy, objFrom } from "../utils";
+import { Fixed, ProduceParam } from "../types";
+import { Params } from "../../schemas/json/types";
+import { deepCopy, objFrom } from "../../utils";
 
 export const getParamsStore = (fixed: Fixed) => {
   const initialParams: Params = {

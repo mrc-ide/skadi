@@ -1,3 +1,15 @@
+import { Result } from "./types";
+
+export const isNullish = (x: any) => x === null || x === undefined;
+
+export const tryResult = <T>(fn: () => T): Result<T> => {
+  try {
+    return { success: true, result: fn() };
+  } catch {
+    return { success: false, result: null };
+  }
+};
+
 export type Eq<T> = (x: T, y: T) => boolean
 const defEq = <T>(x: T, y: T) => x === y;
 
@@ -189,10 +201,6 @@ export const objKeys = <
 >(
   obj: Obj,
 ) => Object.keys(obj) as (keyof Obj)[];
-
-export type Prettify<T> = {
-  [K in keyof T]: T[K];
-} & {};
 
 export const splitComma = (str: string | undefined | null) =>
   str?.split(",").map(s => s.trim());

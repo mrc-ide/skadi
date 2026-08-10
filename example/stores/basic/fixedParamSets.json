@@ -4,17 +4,37 @@
       "sigma": 2
     },
     "styles": {
-      "stroke": "dot",
-      "color": "green"
+      "S": {
+        "color": "red",
+        "stroke": "dot"
+      },
+      "I": {
+        "color": "orange",
+        "stroke": "dot"
+      },
+      "R": {
+        "color": "blue",
+        "stroke": "dot"
+      }
     }
   },
   {
     "user": {
       "beta": 4
     },
-    "style": {
-      "stroke": "dot",
-      "color": "purple"
+    "styles": {
+      "S": {
+        "color": "red",
+        "stroke": "dash"
+      },
+      "I": {
+        "color": "orange",
+        "stroke": "dash"
+      },
+      "R": {
+        "color": "blue",
+        "stroke": "dash"
+      }
     }
   }
 ]

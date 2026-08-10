@@ -1,10 +1,11 @@
 import { createSignal } from "solid-js";
-import { Fixed, FixedJson, Form, JsonPayload, Store } from "./types";
+import { Fixed, Form, Store } from "./types";
 import { getGraphDataStore } from "./graph/data";
 import { getGraphStateStore } from "./graph/state";
 import { getParamsStore } from "./params/state";
-import { validateHtml } from "./html/validate";
-import { processHtml } from "./html/process";
+import { JsonPayload } from "../schemas/json/types";
+import { validateHtml } from "../schemas/html/validate";
+import { parseAndProcessHtml } from "../schemas/html/parseAndProcess";
 
 export const getInitialisedStore = (
   storeName: string,
@@ -12,17 +13,11 @@ export const getInitialisedStore = (
 ): Store => {
   validateHtml(storeName, jsonPayload);
 
-  const fixedJson: FixedJson = {
-    config: jsonPayload.config,
-    modelMetadata: jsonPayload.model.metadata,
-    fixedParamSets: jsonPayload.fixedParamSets,
-  };
-
   const fixed: Fixed = {
-    json: fixedJson,
+    json: jsonPayload,
     // see https://rolldown.rs/guide/troubleshooting#avoiding-direct-eval
     generator: (0, eval)(jsonPayload.model.generator),
-    html: processHtml(storeName, jsonPayload),
+    html: parseAndProcessHtml(storeName, jsonPayload),
   };
 
   const [form, setForm] = createSignal<Form>({});

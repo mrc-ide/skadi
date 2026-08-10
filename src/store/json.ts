@@ -1,5 +1,5 @@
-import { JsonPayload } from "./types";
-import { iterate, objFromVals } from "./utils";
+import { JsonPayload } from "../schemas/json/types";
+import { iterate, objFromVals } from "../utils";
 
 const getJson = async <T>(storeName: string, fileName: string): Promise<T> => {
   const res = await fetch(`./stores/${storeName}/${fileName}.json`);
