@@ -42,7 +42,7 @@ const Reactivity: Component<{ store: string }> = props => {
     });
 
     store.setGraphData({ main, static: static1 });
-  }, { defer: true }))
+  }))
 
   return (<></>)
 }
