@@ -78,6 +78,7 @@ export const jsonSchemas = [
     items: {
       type: "objectStatic",
       properties: [
+        { key: "id", type: "string" },
         {
           key: "static",
           optional: true,

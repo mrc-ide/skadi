@@ -15,6 +15,7 @@ export const typeParsers = {
   parameter: (s: string) => s,
   range: (s: string) => splitComma(s)!.map(parseNumber) as Range,
   formId: (s: string) => s,
+  fixedId: (s: string) => s,
 } as const;
 
 const parseSingleAttrs = (attrsSchema: AttrSchema[], el: Element) => {

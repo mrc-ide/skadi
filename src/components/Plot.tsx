@@ -16,6 +16,8 @@ const Plot: Component<{ store: string, id: string }> = props => {
   let plot!: HTMLDivElement;
   const [skadiChart, setSkadiChart] = createSignal<Chart<any>>();
   const gState = store.getGraphState(props.id);
+  const plotHtmlMetadata = store.fixed.html.processed.plot.find(p => p.id === props.id);
+  const fixedIds = plotHtmlMetadata?.config.fixedid || [];
 
   const drawChart = () => {
     const cfg = gState.config;
@@ -35,6 +37,7 @@ const Plot: Component<{ store: string, id: string }> = props => {
       });
 
       data.static.forEach((s, i) => {
+        if (!fixedIds.includes(s.id)) return;
         s.data.values.forEach(val => {
           const { styles } = store.fixed.json.fixedParamSets[i];
           addLine(val, styles);

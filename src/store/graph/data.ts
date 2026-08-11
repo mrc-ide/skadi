@@ -29,15 +29,25 @@ export const calculateGraphData = (fixed: Fixed, params: ParamValues): DataWithR
   return { data, ...ranges }
 };
 
+export const recalculateGraphData = (fixed: Fixed, params: Params) => {
+  const userParams = { ...params.user, ...params.static };
+  const fixedParams = fixed.json.fixedParamSets.map(p => {
+    return {
+      id: p.id,
+      params: { ...userParams, ...p.user, ...p.static },
+    };
+  });
+  return {
+    main: calculateGraphData(fixed, userParams),
+    static: fixedParams.map(p => {
+      return { id: p.id, ...calculateGraphData(fixed, p.params) }
+    })
+  };
+};
 
 export const getGraphDataStore = (fixed: Fixed, params: Params) => {
-  const userParams = { ...params.user, ...params.static };
-  const fixedParams = fixed.json.fixedParamSets.map(p => ({
-    ...userParams, ...p.user, ...p.static,
-  }));
-  const [graphData, setGraphData] = createSignal<GraphData>({
-    main: calculateGraphData(fixed, userParams),
-    static: fixedParams.map(p => calculateGraphData(fixed, p))
-  });
+  const [graphData, setGraphData] = createSignal<GraphData>(
+    recalculateGraphData(fixed, params)
+  );
   return { graphData, setGraphData }
 };

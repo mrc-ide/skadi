@@ -7,6 +7,11 @@ export const graphConfigSchema = [
   { name: "ylog", optional: true, type: "boolean" },
 ] as const satisfies AttrSchemaSatisfies[];
 
+export const plotConfigAttrs = [
+  ...graphConfigSchema,
+  { name: "fixedid", optional: true, type: "array", items: { type: "fixedId" } },
+] as const;
+
 export const htmlSchemas = [
   {
     class: "storeCfg",
@@ -22,7 +27,7 @@ export const htmlSchemas = [
     attrs: [
       { name: "store", type: "string" },
       { name: "id", type: "string" },
-      ...graphConfigSchema,
+      ...plotConfigAttrs,
     ]
   },
   {
@@ -53,7 +58,7 @@ export const htmlSchemas = [
       ],
       [
         { name: "store", type: "string" },
-        ...graphConfigSchema,
+        ...plotConfigAttrs,
       ]
     ]
   },
