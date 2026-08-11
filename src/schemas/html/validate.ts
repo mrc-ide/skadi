@@ -20,6 +20,8 @@ const isRange = (s: string, json: JsonPayload) => {
 };
 const isFormId = (s: string, json: JsonPayload) =>
   json.forms.map(f => f.id).includes(s as any);
+const isFixedId = (s: string, json: JsonPayload) =>
+  json.fixedParamSets.map(f => f.id).includes(s as any);
 
 export const typeValidators = {
   string: isString,
@@ -30,6 +32,7 @@ export const typeValidators = {
   parameter: isParameter,
   range: isRange,
   formId: isFormId,
+  fixedId: isFixedId,
 } as const;
 
 const validateStoreAttr = () => {

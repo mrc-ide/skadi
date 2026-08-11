@@ -24,7 +24,7 @@ export type DataWithRange = {
 }
 export type GraphData = {
   main: DataWithRange,
-  static: DataWithRange[]
+  static: (DataWithRange & { id :string })[]
 }
 
 export type GraphState = {

@@ -1,7 +1,7 @@
 import path from "node:path";
 import fs from "node:fs";
-import { FormConfig, JsonType, ModelMetadata } from "./types";
-import { isNullish, iterate, objForEach, tryResult } from "../../utils";
+import { FormConfig, JsonPayload, JsonType, ModelMetadata } from "./types";
+import { callIfDuplicate, isNullish, iterate, objForEach, tryResult } from "../../utils";
 import { formAssetType, JsonSchemas } from "./schema";
 
 const typeValidators = {
@@ -87,6 +87,20 @@ export const validateJsonSchema = (
   metadata: ModelMetadata,
 ) => {
   validateJsonType(json, schema, [`(${schema.name}.json)`], metadata);
+};
+
+export const validateIdUnique = <
+  F extends "forms" | "fixedParamSets",
+  Arr extends JsonPayload[F],
+>(
+  file: F,
+  arr: Arr,
+) => {
+  callIfDuplicate(
+    arr,
+    (x, y) => x.id === y.id,
+    el => error(`found duplicate id: ${el.id}`, [`(${file}.json)`])
+  );
 };
 
 export const validateFormDefault = (forms: FormConfig[]) => {

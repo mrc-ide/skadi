@@ -9,6 +9,7 @@ type BaseAttrType =
   | { type: "variable" }
   | { type: "parameter" }
   | { type: "formId" }
+  | { type: "fixedId" }
 
 export type AttrType =
   | BaseAttrType
@@ -29,7 +30,7 @@ export type HtmlSchemaSatisfies = {
 // ---------------------------------------------------------- //
 
 type GetAttrType<T extends AttrType> =
-  T["type"] extends "string" | "parameter" | "variable" | "formId" ? string :
+  T["type"] extends "string" | "parameter" | "variable" | "formId" | "fixedId" ? string :
   T["type"] extends "number" ? number :
   T["type"] extends "boolean" ? boolean :
   T["type"] extends "graphProp" ? (typeof graphConfigSchema)[number]["name"] :
@@ -59,10 +60,14 @@ export type ParsedHtml = Prettify<{
     never
 }>
 
-export type GraphConfig = Concrete<Omit<ParsedHtml["graphCfg"][number], "store" | "id">>
+export type GraphConfigWithFixedId = Concrete<
+  Omit<ParsedHtml["graphCfg"][number], "store" | "id">
+>
+
+export type GraphConfig = Omit<GraphConfigWithFixedId, "fixedid">
 
 export type GraphHtmlMetadata = {
-  id: string, config: Partial<GraphConfig>
+  id: string, config: Partial<GraphConfigWithFixedId>
 }
 
 export type ParsedAndProcessedHtml = {

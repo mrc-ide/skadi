@@ -1,6 +1,6 @@
 import { Component, createEffect, on } from "solid-js";
 import { useStore } from "../store";
-import { calculateGraphData } from "../store/graph/data";
+import { recalculateGraphData } from "../store/graph/data";
 import { ParamValues } from "../schemas/json/types";
 import { getGraphRanges } from "../store/graph/state";
 
@@ -25,23 +25,15 @@ const Reactivity: Component<{ store: string }> = props => {
   }))
 
   createEffect(on(store.params, () => {
-    const params = store.params();
-    const userParams = { ...params.user, ...params.static };
-    const fixedParams = store.fixed.json.fixedParamSets.map(p => ({
-      ...userParams,
-      ...p.user,
-      ...p.static,
-    }));
-    const main = calculateGraphData(store.fixed, userParams);
-    const static1 = fixedParams.map(p => calculateGraphData(store.fixed, p))
+    const newGraphData = recalculateGraphData(store.fixed, store.params());
 
     store.graphStates.forEach(g => {
-      const ranges = getGraphRanges(main, g.config.vars, store.fixed);
+      const ranges = getGraphRanges(newGraphData.main, g.config.vars, store.fixed);
       g.config.xrange = ranges.xrange;
       g.config.yrange = ranges.yrange;
     });
 
-    store.setGraphData({ main, static: static1 });
+    store.setGraphData(newGraphData);
   }))
 
   return (<></>)
