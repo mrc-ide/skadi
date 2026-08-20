@@ -1,16 +1,15 @@
 import { Fixed, Store } from "./types";
-import { getGraphDataStore } from "./graph/data";
-import { getGraphStateStore } from "./graph/state";
 import { getParamsStore } from "./params/state";
 import { JsonPayload } from "../schemas/json/types";
 import { validateHtml } from "../schemas/html/validate";
 import { parseAndProcessHtml } from "../schemas/html/parseAndProcess";
 import { getFormsStore } from "./forms/state";
+import { GraphStateClass } from "./graph/class";
 
-export const getInitialisedStore = (
+export const getInitialisedStore = async (
   storeName: string,
   jsonPayload: JsonPayload,
-): Store => {
+): Promise<Store> => {
   validateHtml(storeName, jsonPayload);
 
   const fixed: Fixed = {
@@ -21,15 +20,14 @@ export const getInitialisedStore = (
   };
 
   const formsStore = getFormsStore(fixed);
-  const paramsStore = getParamsStore(fixed);
-  const graphDataStore = getGraphDataStore(fixed, paramsStore.params());
-  const graphStateStore = getGraphStateStore(fixed, graphDataStore.graphData());
+  const paramsStore = await getParamsStore(storeName, fixed, formsStore.form());
+  const graphStateStore = { graphStates: new GraphStateClass(fixed, paramsStore.params()) };
 
   const store: Store = {
+    name: storeName,
     fixed,
     ...formsStore,
     ...paramsStore,
-    ...graphDataStore,
     ...graphStateStore,
   };
 

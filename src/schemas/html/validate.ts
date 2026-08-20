@@ -1,14 +1,15 @@
+import { syncableKeys } from "../../store/graph/class";
 import { all, callIfDuplicate, isNullish, objFromVals, splitComma } from "../../utils";
 import { JsonPayload } from "../json/types";
-import { Attribute, AttrSchema, ClassName, graphConfigKeys, htmlSchemas } from "./schema";
-import { attrsEq, error, expectAttrs, expectSchema, findSchema, getAttr, getEl, getEls, w } from "./utils";
+import { Attribute, AttrSchema, ClassName, htmlSchemas } from "./schema";
+import { attrsEq, dataW, error, expectAttrs, expectDataAttr, expectSchema, findSchema, getAttr, getEl, getEls, w } from "./utils";
 
 const isString = (s: string, _json: JsonPayload) => !!s
 const isNumber = (s: string, _json: JsonPayload) => !isNaN(parseFloat(s));
 const isBoolean = (s: string, _json: JsonPayload) =>
   s === "" || s.toLowerCase() === "true" || s.toLowerCase() === "false";
-const isGraphProp = (s: string, _json: JsonPayload) =>
-  graphConfigKeys.includes(s as any);
+const isSyncableKey = (s: string, _json: JsonPayload) =>
+  syncableKeys.includes(s as any);
 const isVariable = (s: string, json: JsonPayload) =>
   json.model.metadata.variables.map(v => v.name).includes(s as any);
 const isParameter = (s: string, json: JsonPayload) =>
@@ -21,13 +22,13 @@ const isRange = (s: string, json: JsonPayload) => {
 const isFormId = (s: string, json: JsonPayload) =>
   json.forms.map(f => f.id).includes(s as any);
 const isFixedId = (s: string, json: JsonPayload) =>
-  json.fixedParamSets.map(f => f.id).includes(s as any);
+  s === "main" || json.fixedParamSets.map(f => f.id).includes(s as any);
 
 export const typeValidators = {
   string: isString,
   number: isNumber,
   boolean: isBoolean,
-  graphProp: isGraphProp,
+  syncableKey: isSyncableKey,
   variable: isVariable,
   parameter: isParameter,
   range: isRange,
@@ -80,15 +81,17 @@ const validateStructure = (store: string, json: JsonPayload) => {
         expectSchema(schema.attrs, el);
         attrSchema = schema.attrs;
       } else {
-        const foundS = findSchema(schema, el);
-        if (!foundS) {
+        expectDataAttr("type", el);
+        const foundSchema = findSchema("type", el, schema);
+        if (!foundSchema) {
           error(el, elMsg =>
-            `Unknown set of attributes for ${elMsg}`
+            `Invalid "${dataW("type")}" for ${elMsg}, expected one of `
+            + `${schema.oneOf.map(s => s.type).join(", ")}`
           );
           return;
-        } else {
-          attrSchema = foundS;
         }
+        expectSchema(foundSchema.attrs, el);
+        attrSchema = foundSchema.attrs;
       }
 
       validateSingleAttrs(attrSchema, el, json);
@@ -125,9 +128,16 @@ const validateLink = (
   });
 };
 
+const validateAtLeastOnePlot = (store: string) => {
+  if (getEls("plot", { store }).length < 1) {
+    throw new Error(`Please use at least one plot with "${store}" store`);
+  }
+};
+
 export const validateHtml = (store: string, json: JsonPayload) => {
   validateStoreAttr();
   validateStructure(store, json);
   validateLink("par", "parCfg", ["store", "par"]);
   validateLink("plot", "graphCfg", ["store", "id"], el => !!getAttr("id", el));
+  validateAtLeastOnePlot(store);
 };

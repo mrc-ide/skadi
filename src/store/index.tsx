@@ -21,11 +21,16 @@ export const getStores = async () => {
   const storeTypes = unique(stores.map(getStoreType));
   const jsonPayloads = await readJsonForStores(storeTypes);
 
+  const promises = stores.map(s => {
+    const jsonPayload = jsonPayloads[getStoreType(s)];
+    return getInitialisedStore(s, jsonPayload);
+  });
+  const initialisedStores = await Promise.all(promises);
+
   return objFromVals(
     stores,
-    s => {
-      const jsonPayload = jsonPayloads[getStoreType(s)];
-      const store = getInitialisedStore(s, jsonPayload);
+    (s, sIdx) => {
+      const store = initialisedStores[sIdx];
 
       const StoreContext = createContext<Store>(store);
       storeContexts[s] = StoreContext;
