@@ -89,6 +89,19 @@ export const validateJsonSchema = (
   validateJsonType(json, schema, [`(${schema.name}.json)`], metadata);
 };
 
+export const validateFixedParamSetIdNotMain = (
+  fixedParamSets: JsonPayload["fixedParamSets"]
+) => {
+  fixedParamSets.forEach((p, i) => {
+    if (p.id === "main") {
+      error(
+        `"main" is a reserved id for the main trace, please use a different id`,
+        ["(fixedParamSets.json)", `${i}`]
+      );
+    }
+  });
+};
+
 export const validateIdUnique = <
   F extends "forms" | "fixedParamSets",
   Arr extends JsonPayload[F],

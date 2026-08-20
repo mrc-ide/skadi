@@ -5,12 +5,9 @@ export const graphConfigSchema = [
   { name: "xrange", optional: true, type: "range" },
   { name: "yrange", optional: true, type: "range" },
   { name: "ylog", optional: true, type: "boolean" },
+  { name: "ylock", optional: true, type: "boolean" },
+  { name: "xlock", optional: true, type: "boolean" },
 ] as const satisfies AttrSchemaSatisfies[];
-
-export const plotConfigAttrs = [
-  ...graphConfigSchema,
-  { name: "fixedid", optional: true, type: "array", items: { type: "fixedId" } },
-] as const;
 
 export const htmlSchemas = [
   {
@@ -18,7 +15,7 @@ export const htmlSchemas = [
     uniqueBy: ["store"],
     attrs: [
       { name: "store", type: "string" },
-      { name: "sync", optional: true, type: "array", items: { type: "graphProp" } },
+      { name: "sync", optional: true, type: "array", items: { type: "syncableKey" } },
     ]
   },
   {
@@ -27,7 +24,8 @@ export const htmlSchemas = [
     attrs: [
       { name: "store", type: "string" },
       { name: "id", type: "string" },
-      ...plotConfigAttrs,
+      ...graphConfigSchema,
+      { name: "fixedid", optional: true, type: "array", items: { type: "fixedId" } },
     ]
   },
   {
@@ -52,14 +50,30 @@ export const htmlSchemas = [
   {
     class: "plot",
     oneOf: [
-      [
-        { name: "store", type: "string" },
-        { name: "id", type: "string" },
-      ],
-      [
-        { name: "store", type: "string" },
-        ...plotConfigAttrs,
-      ]
+      {
+        type: "ref",
+        attrs: [
+          { name: "store", type: "string" },
+          { name: "id", type: "string" },
+        ]
+      },
+      {
+        type: "cfg",
+        attrs: [
+          { name: "store", type: "string" },
+          ...graphConfigSchema,
+          { name: "fixedid", optional: true, type: "array", items: { type: "fixedId" } },
+        ]
+      },
+      {
+        type: "diff",
+        attrs: [
+          { name: "store", type: "string" },
+          ...graphConfigSchema,
+          { name: "fixedid1", type: "fixedId" },
+          { name: "fixedid2", type: "fixedId" },
+        ]
+      },
     ]
   },
   {
@@ -78,7 +92,7 @@ export type ClassName = (typeof classNames)[number]
 export const attributes = htmlSchemas.flatMap(
   scheme => "attrs" in scheme
     ? scheme.attrs.map(a => a.name)
-    : scheme.oneOf.flatMap(attrs => attrs.map(a => a.name))
+    : scheme.oneOf.flatMap(s => s.attrs.map(a => a.name))
 );
 export type Attribute =
   | (typeof attributes)[number]
@@ -88,3 +102,8 @@ export type Attribute =
 export type AttrSchema = AttrSchemaSatisfies<Attribute>
 
 export const graphConfigKeys = graphConfigSchema.map(g => g.name);
+
+export const plotTypes = htmlSchemas
+  .find(s => s.class === "plot")!.oneOf
+  .map(s => s.type);
+export type PlotType = (typeof plotTypes)[number];

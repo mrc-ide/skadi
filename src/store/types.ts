@@ -1,47 +1,33 @@
 import { ContinuousGeneratorODE, DiscreteGenerator, NamedResult } from "@reside-ic/dust2"
 import { Lines, ScatterPoints } from "@reside-ic/skadi-chart"
-import { Accessor, Setter } from "solid-js"
-import { GraphConfig, ParsedAndProcessedHtml } from "../schemas/html/types"
+import { Accessor } from "solid-js"
+import { ParsedAndProcessedHtml } from "../schemas/html/types"
 import { FormIdLabel, JsonPayload, Params } from "../schemas/json/types"
+import { GraphStateClass } from "./graph/class"
 
 export type Generator =
   | DiscreteGenerator<any, any, any>
   | ContinuousGeneratorODE<any, any, any>
 
+export type ModelRunResult = {
+  main: NamedResult,
+  static: { id: string, data: NamedResult }[];
+}
+
 export type Metadata = any
 export type PlotData = {
   lines: Lines<Metadata>,
   points: ScatterPoints<Metadata>,
+  extents: { x: Range, y: Range },
 }
 
 export type Form = Record<string, FormIdLabel>
 
-export type Range = [number, number]
-export type DataWithRange = {
-  data: NamedResult,
-  xrange: Range,
-  yrange: Range,
-}
-export type GraphData = {
-  main: DataWithRange,
-  static: (DataWithRange & { id :string })[]
+export type Range = [number, number];
+export type GraphMetadata = {
+  maxExtents: { xrange: Range, yrange: Range }
 }
 
-export type GraphState = {
-  id: string,
-  config: GraphConfig,
-  signals: {
-    fullRerender: Accessor<boolean>,
-    setFullRerender: Setter<boolean>,
-    rangeUpdated: Accessor<boolean>,
-    setRangeUpdated: Setter<boolean>,
-  },
-}
-
-type ExcludeSet<K extends string> = K extends `set${infer _}` ? never : K
-export type GraphSignal = keyof {
-  [K in keyof GraphState["signals"] as ExcludeSet<K>]: any
-}
 
 export type Fixed = {
   json: JsonPayload,
@@ -53,6 +39,7 @@ export type Producer<T> = (fn: (x: T) => void) => void;
 
 export type Store = {
   // will be initialised once at the start
+  name: string,
   fixed: Fixed,
 
 
@@ -70,18 +57,5 @@ export type Store = {
   // |
   // v
 
-  // updated when params update
-  graphData: Accessor<GraphData>,
-  setGraphData: Setter<GraphData>,
-
-
-  graphStates: GraphState[],
-  getGraphState: (
-    id: string,
-  ) => GraphState,
-  setGraphConfig: (
-    id: string,
-    changedProps: Partial<GraphConfig>,
-    rangeUpdated?: boolean,
-  ) => void,
+  graphStates: GraphStateClass,
 }
