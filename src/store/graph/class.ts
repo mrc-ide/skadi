@@ -38,9 +38,7 @@ export class GraphConfigClass {
 
   get = () => this.config as ReadOnly<GraphConfig>;
 
-  set = (
-    changedProps: Partial<GraphConfig>
-  ) => {
+  set = (changedProps: Partial<GraphConfig>) => {
     const propsToSync = objFilter(
       changedProps,
       k => this.mutableKeys.includes(k)
