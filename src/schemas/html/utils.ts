@@ -1,5 +1,6 @@
-import { addIfNotIn, objForEach, tryResult } from "../../utils";
+import { objForEach } from "../../utils";
 import { Attribute, attributes, AttrSchema, ClassName } from "./schema";
+import { OneOfAttrs } from "./types";
 
 // helper function to add `w-`
 export const w = (x: ClassName | Attribute) => `w-${x}`;
@@ -44,113 +45,113 @@ const tagErrorElement = (el: Element) => {
 };
 
 type ErrMsgCallback = (elMsg: string) => string
-export const error = (
-  el: Element, fn: ErrMsgCallback, changeHtml: boolean = true
-) => {
+export const error = (el: Element, fn: ErrMsgCallback) => {
   const msgConsole = fn(`element with tag ${w("error")}`);
   const msgOverlay = fn("element shown below");
 
-  if (changeHtml) {
-    tagErrorElement(el);
+  tagErrorElement(el);
 
+  const errorOverlay = document.createElement("div");
+  errorOverlay.setAttribute("class", "error-overlay");
 
-    const errorOverlay = document.createElement("div");
-    errorOverlay.setAttribute("class", "error-overlay");
+  const errorText = document.createElement("div");
+  errorText.setAttribute("class", "error-text");
+  errorText.textContent = "Error: " + msgOverlay;
 
-    const errorText = document.createElement("div");
-    errorText.setAttribute("class", "error-text");
-    errorText.textContent = "Error: " + msgOverlay;
+  const errorCodeContainer = document.createElement("div");
+  errorCodeContainer.setAttribute("class", "error-code-container");
+  const html = document.body.innerHTML.split("\n");
+  const errLineNum = html.findIndex(l => l.includes(w("error")));
+  const maxDigits = Math.floor(Math.log10(html.length)) + 1;
+  const errPattern = ` ${w("error")}=""`;
+  errorCodeContainer.textContent = html
+    .map((l, i) => {
+      const lNum = `${i + 1}`;
+      return i === errLineNum
+        ? " ==> " + lNum.padStart(maxDigits) + l.replace(errPattern, "")
+        : lNum.padStart(maxDigits + 5) + l; // pad 5 for missing " --> "
+    })
+    .join("\n");
+  
+  const errorInDevtoolsText = document.createElement("div");
+  errorInDevtoolsText.setAttribute("class", "error-in-devtools-text");
+  errorInDevtoolsText.textContent = "You can also view the element in devtools "
+  + "(Ctrl + Shift + i) by going to the Elements tab and searching (Ctrl + f) "
+  + `for "${w("error")}"`;
 
-    const errorCodeContainer = document.createElement("div");
-    errorCodeContainer.setAttribute("class", "error-code-container");
-    const html = document.body.innerHTML.split("\n");
-    const errLineNum = html.findIndex(l => l.includes(w("error")));
-    const maxDigits = Math.floor(Math.log10(html.length)) + 1;
-    const errPattern = ` ${w("error")}=""`;
-    errorCodeContainer.textContent = html
-      .map((l, i) => {
-        const lNum = `${i + 1}`;
-        return i === errLineNum
-          ? " ==> " + lNum.padStart(maxDigits) + l.replace(errPattern, "")
-          : lNum.padStart(maxDigits + 5) + l; // pad 5 for missing " --> "
-      })
-      .join("\n");
-    
-    const errorInDevtoolsText = document.createElement("div");
-    errorInDevtoolsText.setAttribute("class", "error-in-devtools-text");
-    errorInDevtoolsText.textContent = "You can also view the element in devtools "
-    + "(Ctrl + Shift + i) by going to the Elements tab and searching (Ctrl + f) "
-    + `for "${w("error")}"`;
+  errorOverlay.append(errorText);
+  errorOverlay.append(errorCodeContainer);
+  errorOverlay.append(errorInDevtoolsText);
 
-    errorOverlay.append(errorText);
-    errorOverlay.append(errorCodeContainer);
-    errorOverlay.append(errorInDevtoolsText);
+  document.body.append(errorOverlay);
 
-    document.body.append(errorOverlay);
-
-    errorCodeContainer.scrollTo({
-      top: errLineNum / html.length * errorCodeContainer.scrollHeight
-        - errorCodeContainer.getBoundingClientRect().height / 2
-    });
-  }
+  errorCodeContainer.scrollTo({
+    top: errLineNum / html.length * errorCodeContainer.scrollHeight
+      - errorCodeContainer.getBoundingClientRect().height / 2
+  });
 
   throw new Error(msgConsole);
 };
 
-export const expectAttrs = (
-  attrs: Attribute[], el: Element, changeHtml: boolean = true
-) => {
+export const expectAttrs = (attrs: Attribute[], el: Element) => {
   attrs.forEach(a => {
     if (!getAttr(a, el)) {
       error(el, elMsg =>
-        `Attribute "${w(a)}" missing from ${elMsg}`,
-        changeHtml
+        `Attribute "${w(a)}" missing from ${elMsg}`
       );
     }
   });
 };
 
-export const expectOnlyAttrs = (
-  attrs: Attribute[], el: Element, changeHtml: boolean = true
-) => {
+export const dataW = (x: string) => `data-w-${x}`;
+
+export const expectDataAttr = (attr: string, el: Element) => {
+  const dataAttr = dataW(attr);
+  if (!el.getAttribute(dataAttr)) {
+    error(el, elMsg =>
+      `Data attribute "${dataAttr}" missing from ${elMsg}`
+    );
+  }
+};
+
+export const findSchema = <
+  T extends { oneOf: OneOfAttrs[] }
+>(
+  attr: string,
+  el: Element,
+  schema: T
+): T["oneOf"][number] | undefined => {
+  const type = el.getAttribute(dataW(attr))!;
+  return schema.oneOf.find(s => s.type === type);
+};
+
+export const expectOnlyAttrs = (attrs: Attribute[], el: Element) => {
   for (let i = 0; i < el.attributes.length; i++) {
     // stripW returns null if not of form `w-`
     const a = stripW(el.attributes[i].name);
     if (!a) continue;
     if (!isAttr(a)) {
       error(el, elMsg =>
-        `Unknown attribute "${w(a as any)}" defined for ${elMsg}`,
-        changeHtml
+        `Unknown attribute "${w(a as any)}" defined for ${elMsg}`
       );
     } else if (!attrs.includes(a)) {
       error(el, elMsg =>
-        `"${w(a as any)}" defined for ${elMsg} is known but not for this class`,
-        changeHtml
+        `"${w(a as any)}" defined for ${elMsg} is known but not for this class`
       );
     }
   }
 };
 
-export const expectSchema = (
-  attrSchema: AttrSchema[], el: Element, changeHtml: boolean = true
-) => {
+export const expectSchema = (attrSchema: AttrSchema[], el: Element) => {
   const allAttrs = attrSchema
     .map(a => a.name);
-  expectOnlyAttrs(allAttrs, el, changeHtml);
+  expectOnlyAttrs(allAttrs, el);
 
   const requiredAttrs = attrSchema
     .filter(a => !a.optional)
     .map(a => a.name);
-  expectAttrs(requiredAttrs, el, changeHtml);
+  expectAttrs(requiredAttrs, el);
 }
-
-export const findSchema = <
-  T extends { oneOf: AttrSchema[][] }
->(scheme: T, el: Element) => {
-  return scheme.oneOf.find(s => {
-    return tryResult(() => expectSchema(s, el, false)).success;
-  });
-};
 
 export const attrEq = (a: Attribute) =>
   (el1: Element, el2: Element) => getAttr(a, el1) === getAttr(a, el2)

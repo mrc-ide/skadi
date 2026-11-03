@@ -4,10 +4,10 @@ import solid from 'vite-plugin-solid'
 export default defineConfig({
   plugins: [solid()],
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       input: {
         app: "./example/build/index.html"
-      }
+      },
     }
   },
   server: {

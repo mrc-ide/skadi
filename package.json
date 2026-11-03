@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "tsx ./src/builder/builder.ts ./example/ && vite",
     "dev-no-build": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
+    "post-build": "mv ./dist/example/build/index.html ./dist && rm -r ./dist/example/ && cp -r ./example/build/stores ./dist",
     "test:unit": "vitest",
     "test:e2e": "playwright test"
   },

@@ -1,11 +1,12 @@
 import { createSignal } from "solid-js";
-import { Fixed, Producer } from "../types";
+import { Fixed, Form, Producer } from "../types";
 import { Params } from "../../schemas/json/types";
 import { deepCopy, objFrom } from "../../utils";
+import { getParamsFromForm } from "../forms/state";
 
-export const getParamsStore = (fixed: Fixed) => {
+export const getParamsStore = async (storeName: string, fixed: Fixed, form: Form) => {
   const initialParams: Params = {
-    static: {},
+    static: await getParamsFromForm(storeName, fixed, form),
     user: objFrom(
       fixed.html.parsed.parCfg,
       p => p.par,

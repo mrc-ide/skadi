@@ -1,7 +1,7 @@
 import path from "node:path";
 import { processArgs } from "./args";
 import fs from "node:fs";
-import { validateFormAssets, validateFormDefault, validateIdUnique, validateJsonSchema } from "../schemas/json/validate";
+import { validateFixedParamSetIdNotMain, validateFormAssets, validateFormDefault, validateIdUnique, validateJsonSchema } from "../schemas/json/validate";
 import { getJsonSchema, JsonFileName } from "../schemas/json/schema";
 
 const { configPath } = processArgs();
@@ -75,6 +75,7 @@ const main = async () => {
 
     const fixedParamSets = getJson(storePath, "fixedParamSets");
     validateJsonSchema(fixedParamSets, getJsonSchema("fixedParamSets"), metadata);
+    validateFixedParamSetIdNotMain(fixedParamSets);
     validateIdUnique("fixedParamSets", fixedParamSets);
     writeJson(destStorePath, "fixedParamSets", fixedParamSets);
 

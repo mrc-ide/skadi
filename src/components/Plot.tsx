@@ -1,62 +1,44 @@
 import { Component, createEffect, createSignal, on } from "solid-js";
 import { useStore } from "../store";
-import { Chart } from "@reside-ic/skadi-chart";
-import { PlotData, Range } from "../store/types";
-import { getLine } from "./utils";
-import { LineStyles, ParamValue } from "../schemas/json/types";
+import { Chart, Scales } from "@reside-ic/skadi-chart";
 
-type RangeObj = { xrange: Range, yrange: Range }
-const rangeToExtent = (obj: RangeObj) => ({
-  x: { start: obj.xrange[0], end: obj.xrange[1] },
-  y: { start: obj.yrange[0], end: obj.yrange[1] },
-})
+export type PlotProps = { store: string, id: string } & (
+  | { type: "ref" | "cfg" }
+  | { type: "diff", fixedId1: string, fixedId2: string }
+)
 
-const Plot: Component<{ store: string, id: string }> = props => {
+const Plot: Component<PlotProps> = props => {
   const store = useStore(props.store);
   let plot!: HTMLDivElement;
   const [skadiChart, setSkadiChart] = createSignal<Chart<any>>();
-  const gState = store.getGraphState(props.id);
-  const plotHtmlMetadata = store.fixed.html.processed.plot.find(p => p.id === props.id);
-  const fixedIds = plotHtmlMetadata?.config.fixedid || [];
+  const gState = store.graphStates.getGraph(props.id);
 
   const drawChart = () => {
-    const cfg = gState.config;
-    
-    const data = store.graphData();
-    const plotData: PlotData = { lines: [], points: [] };
-    const times = data.main.data.times;
-    cfg.vars.forEach(v => {
-      const addLine = (x: Record<string, ParamValue[]>, styles: LineStyles | undefined) => {
-        const style = styles && styles[v];
-        plotData.lines.push(getLine(v, times, x, style));
-      };
+    const maxExtents = gState.data.extents;
+    const extents = gState.config.get();
 
-      data.main.data.values.forEach(val => {
-        const { styles } = store.fixed.json.config;
-        addLine(val, styles);
-      });
+    const maxScales: Scales = {
+      x: { start: maxExtents.x[0], end: maxExtents.x[1] },
+      y: { start: maxExtents.y[0], end: maxExtents.y[1] },
+    }
+    const scales: Scales = {
+      x: { start: extents.xrange[0], end: extents.xrange[1] },
+      y: { start: extents.yrange[0], end: extents.yrange[1] },
+    }
 
-      data.static.forEach((s, i) => {
-        if (!fixedIds.includes(s.id)) return;
-        s.data.values.forEach(val => {
-          const { styles } = store.fixed.json.fixedParamSets[i];
-          addLine(val, styles);
-        });
-      });
-    });
-
-    const scales = rangeToExtent(cfg);
-    const maxScales = rangeToExtent(data.main);
-    const sChart = new Chart({ logScale: { y: cfg.ylog } })
+    const sChart = new Chart({ logScale: { y: gState.config.get().ylog } })
       .addAxes()
-      .addTraces(plotData.lines)
+      .addTraces(gState.data.lines)
       .addGridLines()
       .addZoom()
       .addCustomLifecycleHooks({
         beforeZoom: zoomProperties => {
-          store.setGraphConfig(props.id, {
-            xrange: zoomProperties.x,
-            yrange: zoomProperties.y,
+          store.graphStates.setGraph(props.id, {
+            type: "range",
+            changed: {
+              xrange: zoomProperties.x,
+              yrange: zoomProperties.y,
+            }
           });
         }
       })
@@ -66,14 +48,13 @@ const Plot: Component<{ store: string, id: string }> = props => {
   };
 
   const handleZoom = () => skadiChart()!.handleZoom({
-    x: gState.config.xrange,
-    y: gState.config.yrange,
+    x: gState.config.get().xrange,
+    y: gState.config.get().yrange,
     eventType: "brush",
   });
 
-  createEffect(on(gState.signals.fullRerender, drawChart, { defer: true }));
-  createEffect(on(store.graphData, drawChart, { defer: true }));
-  createEffect(on(gState.signals.rangeUpdated, handleZoom, { defer: true }));
+  createEffect(on(gState.signals.fullRerender.get, drawChart));
+  createEffect(on(gState.signals.rangeUpdated.get, handleZoom));
 
   return (
     <div ref={plot} style={{ height: "300px" }}></div>

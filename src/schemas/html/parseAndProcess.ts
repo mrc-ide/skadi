@@ -1,8 +1,9 @@
+import { syncableKeys } from "../../store/graph/class";
 import { concatIfNotIn, objFrom, splitComma, zip } from "../../utils";
 import { Range } from "../../utils/types";
 import { JsonPayload } from "../json/types";
-import { AttrSchema, graphConfigKeys, htmlSchemas } from "./schema";
-import { GraphConfig, GraphHtmlMetadata, ParsedAndProcessedHtml, ParsedHtml } from "./types";
+import { AttrSchema, htmlSchemas } from "./schema";
+import { GraphHtmlMetadata, ParsedAndProcessedHtml, ParsedHtml } from "./types";
 import { findSchema, getAttr, getEls, setAttr } from "./utils";
 
 const parseNumber = (s: string) => parseFloat(s);
@@ -10,7 +11,7 @@ export const typeParsers = {
   string: (s: string) => s,
   number: parseNumber,
   boolean: (s: string) => s === "" || s.toLowerCase() === "true",
-  graphProp: (s: string) => graphConfigKeys.find(g => g === s)!,
+  syncableKey: (s: string) => syncableKeys.find(g => g === s)!,
   variable: (s: string) => s,
   parameter: (s: string) => s,
   range: (s: string) => splitComma(s)!.map(parseNumber) as Range,
@@ -45,7 +46,7 @@ export const parseAndProcessHtml = (store: string, json: JsonPayload): ParsedAnd
       return getEls(schema.class, { store }).map(el => {
         const attrSchema = "attrs" in schema
           ? schema.attrs
-          : findSchema(schema, el)!;
+          : findSchema("type", el, schema)!.attrs;
         return parseSingleAttrs(attrSchema, el);
       });
     }
@@ -66,17 +67,20 @@ export const parseAndProcessHtml = (store: string, json: JsonPayload): ParsedAnd
       elsWithId.forEach(x => setAttr("storeid", uuid, x));
 
       // get config
-      let config: Partial<GraphConfig>;
+      let m: GraphHtmlMetadata;
       if ("id" in cfg) {
         const foundCfg = parsed.graphCfg.find(g => g.id)!;
         // @ts-expect-error
         delete foundCfg.id;
-        config = foundCfg;
+        m = { id: uuid, config: foundCfg, type: "cfg" };
+      } else if ("fixedid" in cfg) {
+        m = { id: uuid, config: cfg, type: "cfg" };
+      } else if ("fixedid1" in cfg) {
+        m = { id: uuid, config: cfg, type: "diff" };
       } else {
-        config = cfg;
+        throw new Error("Unknown config type");
       }
 
-      const m: GraphHtmlMetadata = { id: uuid, config };
       return [...metadata, m];
     }, [] as GraphHtmlMetadata[]);
 

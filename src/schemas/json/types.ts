@@ -55,7 +55,9 @@ export type JsonPayload = Prettify<{
 export type Model = JsonPayload["model"]
 export type ModelMetadata = JsonPayload["model"]["metadata"]
 export type FixedParamSet = JsonPayload["fixedParamSets"]
-export type Params = Concrete<Omit<NonNullable<JsonPayload["fixedParamSets"][number]>, "styles">>
+export type Params = Concrete<
+  Omit<NonNullable<JsonPayload["fixedParamSets"][number]>, "styles" | "id">
+>
 export type ParamValues = NonNullable<JsonPayload["fixedParamSets"][number]["user"]>
 export type ParamValue = ParamValues[string]
 export type Config = JsonPayload["config"]

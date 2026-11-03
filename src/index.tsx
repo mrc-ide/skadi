@@ -6,9 +6,10 @@ import ParamSlider from './components/ParamSlider';
 import Plot from './components/Plot';
 import { JSX } from 'solid-js';
 import Reactivity from './components/Reactivity';
-import { getAttr, getEls } from './schemas/html/utils';
+import { dataW, getAttr, getEls } from './schemas/html/utils';
 import { objForEach } from './utils';
 import Form from './components/Form';
+import { PlotType } from './schemas/html/schema';
 
 type RenderFunc = (el: Element, getJsx: () => JSX.Element) => void
 
@@ -33,11 +34,24 @@ const renderReactivityEls = (store: string, renderWithStore: RenderFunc) => {
 const renderPlotEls = (store: string, renderWithStore: RenderFunc) => {
   const els = getEls("plot", { store });
   return els.map(el =>  {
-   const props = {
-      store,
-      id: getAttr("storeid", el)!,
-    };
-    renderWithStore(el, () => <Plot {...props}/>)
+    const type = el.getAttribute(dataW("type"))! as PlotType;
+    if (type !== "diff") {
+      const props = {
+        store,
+        type,
+        id: getAttr("storeid", el)!,
+      };
+      renderWithStore(el, () => <Plot {...props}/>)
+    } else {
+      const props = {
+        store,
+        type,
+        id: getAttr("storeid", el)!,
+        fixedId1: getAttr("fixedid1", el)!,
+        fixedId2: getAttr("fixedid2", el)!,
+      };
+      renderWithStore(el, () => <Plot {...props}/>)
+    }
   })
 };
 

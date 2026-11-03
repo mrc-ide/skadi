@@ -70,7 +70,7 @@ export const zip = <
   return arr1.map((a, i) => [a, arr2[i]] as [ArrType1, ArrType2]);
 };
 
-export const deepCopy = (obj: object) => {
+export const deepCopy = <T extends object>(obj: T): T => {
   return JSON.parse(JSON.stringify(obj));
 };
 
@@ -160,7 +160,7 @@ export const objAssignIfTruthy = <
   return objFromVals(
     arr,
     k => obj1[k] ?? obj2[k]
-  );
+  ) as { [Key in K]: O2[Key] };
 };
 
 export const objMergeAndAssignKey = <
