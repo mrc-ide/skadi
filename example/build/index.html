@@ -77,6 +77,36 @@
     </div>
 
 
+
+    <div class="w-storeCfg"
+         w-store="notbasic"
+         w-sync="xrange"></div>
+    
+    <div class="w-graphCfg"
+         w-id="2"
+         w-store="notbasic"
+         w-vars="s_1, s_2, s_3, s_4"></div>
+
+    <div class="w-parCfg"
+         w-store="notbasic"
+         w-par="beta_fade"
+         w-val="1"
+         w-min="0.01"
+         w-max="2"
+         w-step="0.01"></div>
+
+    <p>Change the number of age groups</p>
+    <div class="w-form" w-store="notbasic" w-formid="n_age" style="margin-top: 20px;"></div>
+    <p>Change the intensity of beta</p>
+    <div class="w-form" w-store="notbasic" w-formid="beta_intensity" style="margin-top: 20px;"></div>
+
+    <div class="w-par" style="margin-top: 20px;" w-store="notbasic" w-par="beta_fade"></div>
+
+    <div class="graph-container">
+      <div class="w-plot" data-w-type="ref" w-store="notbasic" w-id="2"></div>
+    </div>
+
+
     <script type="module" src="/src/index.tsx"></script>
   </body>
   <style>
