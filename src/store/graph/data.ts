@@ -1,4 +1,4 @@
-import { System } from "@reside-ic/dust2";
+import { ContinuousGeneratorODE, DiscreteGenerator, System } from "@reside-ic/dust2";
 import { Fixed, ModelRunResult, PlotData, Range } from "../types";
 import { LineStyle, LineStyles, Params, ParamValue, ParamValues, Stroke } from "../../schemas/json/types";
 import { GraphHtmlMetadata } from "../../schemas/html/types";
@@ -6,13 +6,21 @@ import { objMap } from "../../utils";
 
 const runModel = (fixed: Fixed, params: ParamValues) => {
   const { startTime, endTime, particles, dt } = fixed.json.config;
-  const sys = System.createODE(
-    fixed.generator as any,
-    params,
-    startTime || 0,
-    dt || 0.01,
-    particles || 1,
-  );
+  const sys = fixed.json.model.metadata.time === "discrete"
+    ? System.createDiscrete(
+      fixed.generator as DiscreteGenerator<any, any, any>,
+      params,
+      startTime || 0,
+      dt || 0.01,
+      particles || 1,
+    )
+    : System.createODE(
+      fixed.generator as ContinuousGeneratorODE<any, any, any>,
+      params,
+      startTime || 0,
+      dt || 0.01,
+      particles || 1,
+    )
 
   sys.setStateInitial();
 
@@ -43,7 +51,7 @@ const getLine = (
   const line: PlotData["lines"][number] = { points: [], style: {} };
 
   for (let i = 0; i < xs.length; i++) {
-    line.points.push({ x: xs[i], y: ys[i] });
+    line.points.push({ x: [xs[i]], y: [ys[i]] });
   }
 
   if (style) {
@@ -123,8 +131,8 @@ const getPlotData = (
 
   plotData.lines.forEach(l => {
     l.points.forEach(({ y }) => {
-      if (y < plotData.extents.y[0]) plotData.extents.y[0] = y;
-      if (y > plotData.extents.y[1]) plotData.extents.y[1] = y;
+      if ((y[0] as number) < plotData.extents.y[0]) plotData.extents.y[0] = y[0] as number;
+      if ((y[0] as number) > plotData.extents.y[1]) plotData.extents.y[1] = y[0] as number;
     });
   });
 

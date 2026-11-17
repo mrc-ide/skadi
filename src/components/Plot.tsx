@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, on } from "solid-js";
 import { useStore } from "../store";
-import { Chart, Scales } from "@reside-ic/skadi-chart";
+import { Chart2 } from "@reside-ic/skadi-chart";
 
 export type PlotProps = { store: string, id: string } & (
   | { type: "ref" | "cfg" }
@@ -10,46 +10,56 @@ export type PlotProps = { store: string, id: string } & (
 const Plot: Component<PlotProps> = props => {
   const store = useStore(props.store);
   let plot!: HTMLDivElement;
-  const [skadiChart, setSkadiChart] = createSignal<Chart<any>>();
+  const [skadiChart, setSkadiChart] = createSignal<any>();
   const gState = store.graphStates.getGraph(props.id);
 
   const drawChart = () => {
-    const maxExtents = gState.data.extents;
     const extents = gState.config.get();
 
-    const maxScales: Scales = {
-      x: { start: maxExtents.x[0], end: maxExtents.x[1] },
-      y: { start: maxExtents.y[0], end: maxExtents.y[1] },
-    }
-    const scales: Scales = {
-      x: { start: extents.xrange[0], end: extents.xrange[1] },
-      y: { start: extents.yrange[0], end: extents.yrange[1] },
-    }
-
-    const sChart = new Chart({ logScale: { y: gState.config.get().ylog } })
+    const sChart2 = Chart2.start()
+      .xBottom().numerical()
+      .yLeft().numerical()
+      .startHtml()
+      .addElement(plot)
+      .startData()
+      .registerLines(gState.data.lines)
+      .startConfig()
+      .configureAxes({
+        y: { start: [{ log: gState.config.get().ylog }] }
+      })
+      .configureDomain({
+        x: {
+          start: [{ domain: extents.xrange }]
+        },
+        y: {
+          start: [{ domain: extents.yrange }]
+        }
+      })
+      .startVisual()
       .addAxes()
-      .addTraces(gState.data.lines)
-      .addGridLines()
-      .addZoom()
-      .addCustomLifecycleHooks({
-        beforeZoom: zoomProperties => {
+      .addTraces()
+      .addCustomHooks({
+        beforeZoomHook: zoomProperties => {
           store.graphStates.setGraph(props.id, {
             type: "range",
             changed: {
-              xrange: zoomProperties.x,
-              yrange: zoomProperties.y,
+              xrange: zoomProperties.x.start ?? undefined,
+              yrange: zoomProperties.y.start ?? undefined,
             }
           });
-        }
+        },
       })
-      .appendTo(plot, maxScales, scales)
+      .startInteractive()
+      .addZoom()
+      .end()
+      .outputs();
 
-    setSkadiChart(sChart);
+    setSkadiChart(sChart2);
   };
 
-  const handleZoom = () => skadiChart()!.handleZoom({
-    x: gState.config.get().xrange,
-    y: gState.config.get().yrange,
+  const handleZoom = () => skadiChart()!.interactiveState.interactiveLayers.skadiChartZoom!.handleZoom({
+    x: { start: gState.config.get().xrange },
+    y: { start: gState.config.get().yrange },
     eventType: "brush",
   });
 

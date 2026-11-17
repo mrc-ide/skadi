@@ -1,0 +1,1 @@
+[{"id":"n_age","fields":[{"label":"Number of age groups","options":[{"id":"3","label":"Tri-group"},{"id":"4","label":"Quad-group"}],"default":"3"}]},{"id":"beta_intensity","fields":[{"label":"Beta intensity","options":[{"id":"high","label":"High"},{"id":"low","label":"Low"}],"default":"low"}]}]

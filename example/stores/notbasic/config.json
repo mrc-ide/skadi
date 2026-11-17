@@ -1,0 +1,24 @@
+{
+  "startTime": 0,
+  "endTime": 35,
+  "particles": 1,
+  "dt": 1,
+  "styles": {
+    "s_1": {
+      "color": "red",
+      "width": 2
+    },
+    "s_2": {
+      "color": "orange",
+      "width": 2
+    },
+    "s_3": {
+      "color": "blue",
+      "width": 1
+    },
+    "s_4": {
+      "color": "green",
+      "width": 1
+    }
+  }
+}
