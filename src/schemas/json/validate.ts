@@ -135,7 +135,7 @@ export const validateFormAssets = (
   let allFiles = fs.readdirSync(formAssetsPath);
 
   const fieldIds = forms.flatMap(f => f.fields.map(f => f.options.map(op => op.id)));
-  iterate(...fieldIds, async (...args) => {
+  iterate(...fieldIds, (...args) => {
     const fileName = args.slice(0, args.length / 2).join("__") + ".json";
     const filePath = path.resolve(formAssetsPath, fileName);
     allFiles = allFiles.filter(f => f !== fileName);
