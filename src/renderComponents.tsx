@@ -4,7 +4,9 @@ import ParamSlider from "./components/ParamSlider";
 import Plot from "./components/Plot";
 import Reactivity from "./components/Reactivity";
 import { PlotType } from "./schemas/html/schema";
-import { dataW, getAttr, getEls } from "./schemas/html/utils";
+import { dataW, getAttr, getEls, w } from "./schemas/html/utils";
+import { supportedVariants } from "./schemas/html/validate";
+import Barchart from "./components/Barchart";
 
 type RenderFunc = (el: Element, getJsx: () => JSX.Element) => void
 
@@ -30,13 +32,15 @@ export const renderPlotEls = (store: string, renderWithStore: RenderFunc) => {
   const els = getEls("plot", { store });
   return els.map(el =>  {
     const type = el.getAttribute(dataW("type"))! as PlotType;
+    const variant = el.getAttribute(w("variant")) || supportedVariants[0];
+    const El = variant === supportedVariants[0] ? Plot : Barchart;
     if (type !== "diff") {
       const props = {
         store,
         type,
         id: getAttr("storeid", el)!,
       };
-      renderWithStore(el, () => <Plot {...props}/>)
+      renderWithStore(el, () => <El {...props}/>)
     } else {
       const props = {
         store,
@@ -45,7 +49,7 @@ export const renderPlotEls = (store: string, renderWithStore: RenderFunc) => {
         fixedId1: getAttr("fixedid1", el)!,
         fixedId2: getAttr("fixedid2", el)!,
       };
-      renderWithStore(el, () => <Plot {...props}/>)
+      renderWithStore(el, () => <El {...props}/>)
     }
   })
 };

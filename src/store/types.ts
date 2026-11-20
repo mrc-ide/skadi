@@ -1,5 +1,5 @@
 import { ContinuousGeneratorODE, DiscreteGenerator, NamedResult } from "@reside-ic/dust2"
-import { Lines2, ScatterPoints2 } from "@reside-ic/skadi-chart"
+import { Bars2, Lines2, ScatterPoints2 } from "@reside-ic/skadi-chart"
 import { Accessor } from "solid-js"
 import { ParsedAndProcessedHtml } from "../schemas/html/types"
 import { FormIdLabel, JsonPayload, Params } from "../schemas/json/types"
@@ -18,6 +18,7 @@ export type Metadata = any
 export type PlotData = {
   lines: Lines2,
   points: ScatterPoints2,
+  bars: Bars2,
   extents: { x: Range, y: Range },
 }
 

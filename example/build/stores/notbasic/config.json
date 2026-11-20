@@ -1,1 +1,1 @@
-{"startTime":0,"endTime":35,"particles":1,"dt":1,"styles":{"s_1":{"color":"red","width":2},"s_2":{"color":"orange","width":2},"s_3":{"color":"blue","width":1},"s_4":{"color":"green","width":1}}}
+{"startTime":0,"endTime":35,"particles":1,"dt":1,"styles":{"normal":{"s_1":{"color":"red","width":2},"s_2":{"color":"orange","width":2},"s_3":{"color":"blue","width":1},"s_4":{"color":"green","width":1}},"bar":{"s_1":{"color":"red"},"s_2":{"color":"orange"},"s_3":{"color":"blue"},"s_4":{"color":"green"}}}}

@@ -134,10 +134,26 @@ const validateAtLeastOnePlot = (store: string) => {
   }
 };
 
+export const supportedVariants = ["normal", "bar"];
+const validateVariantOfPlot = (store: string) => {
+  getEls("plot", { store }).forEach(el => {
+    const variant = getAttr("variant", el);
+    if (!variant) return;
+
+    if (!supportedVariants.includes(variant)) {
+      error(el, elMsg =>
+        `The variant attribute of the ${elMsg} must be one of `
+        + `${supportedVariants.join(", ")}`
+      );
+    }
+  });
+}
+
 export const validateHtml = (store: string, json: JsonPayload) => {
   validateStoreAttr();
   validateStructure(store, json);
   validateLink("par", "parCfg", ["store", "par"]);
   validateLink("plot", "graphCfg", ["store", "id"], el => !!getAttr("id", el));
   validateAtLeastOnePlot(store);
+  validateVariantOfPlot(store);
 };
