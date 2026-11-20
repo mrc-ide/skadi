@@ -28,12 +28,8 @@ const Plot: Component<PlotProps> = props => {
         y: { start: [{ log: gState.config.get().ylog }] }
       })
       .configureDomain({
-        x: {
-          start: [{ domain: extents.xrange }]
-        },
-        y: {
-          start: [{ domain: extents.yrange }]
-        }
+        x: { start: [{ domain: extents.xrange }] },
+        y: { start: [{ domain: extents.yrange }] }
       })
       .startVisual()
       .addAxes()
@@ -57,11 +53,12 @@ const Plot: Component<PlotProps> = props => {
     setSkadiChart(sChart2);
   };
 
-  const handleZoom = () => skadiChart()!.interactiveState.interactiveLayers.skadiChartZoom!.handleZoom({
-    x: { start: gState.config.get().xrange },
-    y: { start: gState.config.get().yrange },
-    eventType: "brush",
-  });
+  const handleZoom = () =>
+    skadiChart()!.interactiveState.interactiveLayers.skadiChartZoom!.handleZoom({
+      x: { start: gState.config.get().xrange },
+      y: { start: gState.config.get().yrange },
+      eventType: "brush",
+    });
 
   createEffect(on(gState.signals.fullRerender.get, drawChart));
   createEffect(on(gState.signals.rangeUpdated.get, handleZoom));

@@ -1,6 +1,7 @@
 import { AttrSchemaSatisfies, HtmlSchemaSatisfies } from "./types";
 
 export const graphConfigSchema = [
+  { name: "variant", optional: true, type: "string" },
   { name: "vars", optional: true, type: "array", items: { type: "variable"} },
   { name: "xrange", optional: true, type: "range" },
   { name: "yrange", optional: true, type: "range" },

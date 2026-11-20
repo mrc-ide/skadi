@@ -10,8 +10,8 @@ const modelInfo = {
   }
 } as const satisfies JsonType;
 
-const styles = {
-  key: "styles",
+const normalStyles = {
+  key: "normal",
   optional: true,
   type: "object",
   properties: {
@@ -30,6 +30,32 @@ const styles = {
       ]
     }
   }
+} as const satisfies StaticObjectProperty;
+
+const barStyles = {
+  key: "bar",
+  optional: true,
+  type: "object",
+  properties: {
+    key: { type: "variable" },
+    value: {
+      type: "objectStatic",
+      properties: [
+        { key: "color", optional: true, type: "string" },
+        { key: "opacity", optional: true, type: "number" },
+      ]
+    }
+  }
+} as const satisfies StaticObjectProperty;
+
+const styles = {
+  key: "styles",
+  optional: true,
+  type: "objectStatic",
+  properties: [
+    normalStyles,
+    barStyles,
+  ]
 } as const satisfies StaticObjectProperty;
 
 const parameterValue = {

@@ -6,6 +6,7 @@ import { objAssignIfTruthy, objFilter, objKeys } from "../../utils";
 import { Fixed, PlotData } from "../types";
 import { defaultRange, getAllData } from "./data";
 import { Range, ReadOnly, Values } from "../../utils/types";
+import { supportedVariants } from "../../schemas/html/validate";
 
 type GraphKey = keyof GraphConfig;
 
@@ -21,6 +22,7 @@ export class GraphConfigClass {
     this.config = objAssignIfTruthy(
       graphConfigKeys, graphHtmlMetadata.config,
       {
+        variant: supportedVariants[0],
         vars: fixed.json.model.metadata.variables.map(v => v.name),
         xrange: data.extents.x,
         yrange: data.extents.y,
@@ -163,7 +165,12 @@ export class GraphStateClass {
   setGraph = (id: string, payload: SetGraphPayload) => {
     const graph = this.getGraph(id);
     graph.config.set(payload.changed);
+
+    const cfg = graph.config.get();
     this.syncKeys.forEach(s => {
+      // don't sync for graphs which are locked
+      if (s === "xrange" && cfg.xlock) return;
+      if (s === "yrange" && cfg.ylock) return;
       const value = graph.config.get()[s];
       this.graphStates.forEach(g => g.config.set({ [s]: value }));
     });

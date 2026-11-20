@@ -1,8 +1,9 @@
 import { ContinuousGeneratorODE, DiscreteGenerator, System } from "@reside-ic/dust2";
 import { Fixed, ModelRunResult, PlotData, Range } from "../types";
-import { LineStyle, LineStyles, Params, ParamValue, ParamValues, Stroke } from "../../schemas/json/types";
+import { BarStyle, BarStyles, LineStyle, LineStyles, Params, ParamValue, ParamValues, Stroke, Styles } from "../../schemas/json/types";
 import { GraphHtmlMetadata } from "../../schemas/html/types";
 import { objMap } from "../../utils";
+import { supportedVariants } from "../../schemas/html/validate";
 
 const runModel = (fixed: Fixed, params: ParamValues) => {
   const { startTime, endTime, particles, dt } = fixed.json.config;
@@ -63,6 +64,29 @@ const getLine = (
   return line;
 }
 
+const getBar = (
+  v: string,
+  ys: number[],
+  style?: BarStyle | undefined
+) => {
+  const bar: PlotData["bars"][number] = {
+    baseAxis: "xBottom",
+    valueAxis: "yLeft",
+    base: [v],
+    stack: [{
+      style: {},
+      range: [0, ys.at(-1)!]
+    }]
+  };
+
+  if (style) {
+    bar.stack[0].style.color = style.color;
+    bar.stack[0].style.opacity = style.opacity;
+  }
+
+  return bar;
+}
+
 export const defaultRange = (): Range => [Infinity, -Infinity];
 
 const getPlotData = (
@@ -75,6 +99,7 @@ const getPlotData = (
   const plotData: PlotData = {
     lines: [],
     points: [],
+    bars: [],
     extents: {
       x: [xs[0], xs[xs.length - 1]],
       y: defaultRange()
@@ -85,11 +110,21 @@ const getPlotData = (
   const addLine = (
     v: string,
     val: Record<string, ParamValue[]>,
-    styles: LineStyles | undefined
+    styles: Styles | undefined
   ) => {
-    const style = styles && styles[v];
+    const style = styles?.normal && styles.normal[v];
     plotData.lines.push(getLine(xs, val[v] as number[], style));
   };
+  const addBar = (
+    v: string,
+    val: Record<string, ParamValue[]>,
+    styles: Styles | undefined
+  ) => {
+    const style = styles?.bar && styles.bar[v];
+    plotData.bars.push(getBar(v, val[v] as number[], style));
+  };
+  const variant = g.config.variant || supportedVariants[0];
+  const addVisual = variant === supportedVariants[0] ? addLine : addBar;
 
   if (g.type === "cfg") {
     const ids = g.config.fixedid;
@@ -97,7 +132,7 @@ const getPlotData = (
       if (!ids || (ids && ids.includes("main"))) {
         res.main.values.forEach(val => {
           const { styles } = fixed.json.config;
-          addLine(v, val, styles);
+          addVisual(v, val, styles);
         });
       }
 
@@ -105,7 +140,7 @@ const getPlotData = (
         if (!ids || (ids && ids.includes(s.id))) {
           s.data.values.forEach(val => {
             const { styles } = fixed.json.fixedParamSets[i];
-            addLine(v, val, styles);
+            addVisual(v, val, styles);
           });
         }
       });
@@ -125,7 +160,7 @@ const getPlotData = (
           (y1, y1Idx) => y1 - (data2.values[v1Idx][k][y1Idx] as number)
         )
       ));
-      values.forEach(val => addLine(v, val, styles));
+      values.forEach(val => addVisual(v, val, styles));
     })
   }
 
@@ -133,6 +168,14 @@ const getPlotData = (
     l.points.forEach(({ y }) => {
       if ((y[0] as number) < plotData.extents.y[0]) plotData.extents.y[0] = y[0] as number;
       if ((y[0] as number) > plotData.extents.y[1]) plotData.extents.y[1] = y[0] as number;
+    });
+  });
+
+  plotData.bars.forEach(b => {
+    b.stack.forEach(s => {
+      const [ low, high ] = s.range;
+      if (low < plotData.extents.y[0]) plotData.extents.y[0] = low;
+      if (high > plotData.extents.y[1]) plotData.extents.y[1] = high;
     });
   });
 
