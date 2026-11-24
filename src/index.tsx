@@ -4,7 +4,7 @@ import './index.css'
 import { getStores } from './store'
 import { JSX } from 'solid-js';
 import { objForEach } from './utils';
-import { renderFormEls, renderParamSliderEls, renderPlotEls, renderReactivityEls } from './renderComponents';
+import { renderFieldValueEls, renderFormEls, renderParamMaxEls, renderParamMinEls, renderParamSliderEls, renderParamValueEls, renderPlotEls, renderReactivityEls } from './renderComponents';
 
 const main = async () => {
   objForEach(
@@ -19,6 +19,10 @@ const main = async () => {
         ), el);
       };
       renderParamSliderEls(store, renderWithStore);
+      renderParamValueEls(store, renderWithStore);
+      renderFieldValueEls(store, renderWithStore);
+      renderParamMinEls(store, renderWithStore);
+      renderParamMaxEls(store, renderWithStore);
       renderPlotEls(store, renderWithStore);
       renderFormEls(store, renderWithStore);
       renderReactivityEls(store, renderWithStore);

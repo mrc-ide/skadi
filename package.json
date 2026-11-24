@@ -7,6 +7,7 @@
     "dev": "tsx ./src/builder/builder.ts ./example/ && vite",
     "dev-no-build": "vite",
     "build": "vite build",
+    "type-check": "tsc --noEmit -p tsconfig.app.json",
     "post-build": "mv ./dist/example/build/index.html ./dist && rm -r ./dist/example/ && cp -r ./example/build/stores ./dist",
     "test:unit": "vitest",
     "test:e2e": "playwright test"
