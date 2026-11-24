@@ -1,4 +1,4 @@
-# Intro to Skadi
+## Intro to Skadi
 
 This is a configurable and extendable HTML and JSON framework that creates static (no server)
 and interactive visualisations of their [Odin2](https://github.com/mrc-ide/odin2) models. An
@@ -26,7 +26,7 @@ folder structure is:
 Given this, we do some work at both build time and run time to create a site.
 
 
-# Build time
+## Build time
 
 * A builder [src/builder](./src/builder/) in combination with a running
   [odin.api container](./scripts/run-deps-prod.sh) is responsible for:
@@ -38,7 +38,7 @@ Given this, we do some work at both build time and run time to create a site.
   This builds the bundle that can be deployed anywhere.
 
 
-# Run time
+## Run time
 
 * The main entry first parses HTML for all stores that it uses. For each one, we validate all
   HTML elements attached to that store (with `w-store` attribute) against schema in
@@ -57,7 +57,7 @@ reactivity between different parts of the store listed below. This is mounted fo
 More detail on this below.
 
 
-# Store
+## Store
 
 The store is not a traditional store where everything is deeply reactive. This is too slow and
 also has too many side effects leading to complicated control flow and a web of reactivity that
@@ -74,7 +74,7 @@ in the following way:
 So the general flow is `form` -> `params` -> `graphState` -> components. This is linear and
 simpler to think about. Below is more detail about each of these parts
 
-## Fixed
+### Fixed
 
 The store has a `fixed` field that contains all the information from fetching the corresponding
 user defined JSON (`config.json`, `forms.json`, etc) as well as the parsed and processed HTML.
@@ -82,13 +82,13 @@ We also need to `eval` the Javascript code that is represented as a string from 
 convert it into a valid Javascript object that we can feed into
 [dust2-js](https://github.com/reside-ic/dust2-js) (the runner for the compiled model).
 
-## Form
+### Form
 
 This adds the `form` and `setForm` fields. The `form` signal is initialised by the defaults for
 the form value that the users put in `forms.json`. This `form` signal is passed on below into
 creating the `params` signal
 
-## Params
+### Params
 
 This adds the `params` and `setParams` fields into the store. The signal contains the `static`
 and `user` keys. The `user` key is populated with defaults for parameters specified in the
@@ -96,9 +96,9 @@ and `user` keys. The `user` key is populated with defaults for parameters specif
 `formAssets/` with the current values of the `form` signal (which is passed in when we create
 this part of the store)
 
-## Graph States
+### Graph States
 
-### GraphStateClass
+#### GraphStateClass
 
 This adds the `graphStates` field into the store. The `GraphStateClass` is a class that
 encapsulates getters and setters for graphs as well as updating graph data when `params` is
@@ -133,7 +133,7 @@ are different, e.g. if user has defined custom y ranges for multiple graphs but 
 sync `yrange` then we take the outer range of all these ranges (range that contains all of the
 custom ranges)
 
-### GraphState
+#### GraphState
 
 This is the object inside the arrays in `graphStates` key in the `GraphStateClass`. This object
 represents a plot shown to the user (ignoring copies of the same graph that the user may place in
@@ -153,7 +153,7 @@ multiple locations in the HTML). This holds the following keys:
   first update the rest of the values and at the end of your function, trigger one of these
   signals. Under the hood these are just boolean values that toggle between `true` and `false`
 
-### GraphConfigClass
+#### GraphConfigClass
 
 This class holds the following data:
 * `config` - this object holds visual data about the graph such as its `xrange` or shown `vars`
@@ -168,9 +168,9 @@ This class holds the following methods:
   `ylock` is set on the graph, this function will not update the `yrange`
 
 
-# Schemas and validation
+## Schemas and validation
 
-## Intro and motivation
+### Intro and motivation
 
 To reduce code duplication both the JSON and HTML configuration that is provided by the user is
 validated, parsed and typed via the corresponding schemas. This is custom to Skadi and doesn't use
@@ -191,7 +191,7 @@ already objects so `JSON.parse` is sufficient to parse it. For HTML, we have an 
 `parseAndProcess.ts` file that converts relevant HTML into objects but also does more proceessing
 on these objects. More details below.
 
-## JSON
+### JSON
 
 The JSON schema is simpler than the HTML one. We have support for usual JS types like strings,
 number, etc in `JsonType` type in `types.ts` file. Some more custom types are:
@@ -211,7 +211,7 @@ validate more custom logic like `id`s in a JSON file being unique or `default` i
 an actual valid `id` of one of the options. It is good to put these extra assumptions and logic
 here
 
-## HTML
+### HTML
 
 For the HTML schema, we care about `div`s with a particular `class` and their attributes (both
 classes and attributes start with `w-` or `data-w-`). All attributes are strings so part of the
@@ -244,7 +244,7 @@ the user has referenced in the HTML for optimising the runner by only serialisin
 those variables
 
 
-# Code style
+## Code style
 
 Most of Skadi processing is written in a functional style. These functions can be found in
 [src/utils/index.ts](./src/utils/index.ts). Most of the JSON and the HTML schema files are
@@ -253,7 +253,7 @@ written in a functional way as well. Some more abstractions for HTML schema can 
 in the same style, it is recommended to skim through both these files
 
 
-# Components/Adding new components
+## Components/Adding new components
 
 All components are in the [src/components](./src/components/) folder. These are written in
 `solid-js`. There is nothing special about how these components are written however, the main
