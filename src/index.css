@@ -57,3 +57,7 @@ body {
   border-top: 1px solid var(--error-light);
   border-bottom: 1px solid var(--error-light);
 }
+
+.w-parVal, .w-parMin, .w-parMax, .w-fieldVal {
+  display: inline;
+}

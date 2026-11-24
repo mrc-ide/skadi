@@ -152,7 +152,10 @@ const validateVariantOfPlot = (store: string) => {
 export const validateHtml = (store: string, json: JsonPayload) => {
   validateStoreAttr();
   validateStructure(store, json);
-  validateLink("par", "parCfg", ["store", "par"]);
+  validateLink("parSlider", "parCfg", ["store", "par"]);
+  validateLink("parVal", "parCfg", ["store", "par"]);
+  validateLink("parMin", "parCfg", ["store", "par"]);
+  validateLink("parMax", "parCfg", ["store", "par"]);
   validateLink("plot", "graphCfg", ["store", "id"], el => !!getAttr("id", el));
   validateAtLeastOnePlot(store);
   validateVariantOfPlot(store);

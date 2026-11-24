@@ -42,10 +42,38 @@ export const htmlSchemas = [
     ]
   },
   {
-    class: "par",
+    class: "parSlider",
     attrs: [
       { name: "store", type: "string" },
       { name: "par", type: "parameter" },
+    ]
+  },
+  {
+    class: "parVal",
+    attrs: [
+      { name: "store", type: "string" },
+      { name: "par", type: "parameter" },
+    ]
+  },
+  {
+    class: "parMin",
+    attrs: [
+      { name: "store", type: "string" },
+      { name: "par", type: "parameter" },
+    ]
+  },
+  {
+    class: "parMax",
+    attrs: [
+      { name: "store", type: "string" },
+      { name: "par", type: "parameter" },
+    ]
+  },
+  {
+    class: "fieldVal",
+    attrs: [
+      { name: "store", type: "string" },
+      { name: "fieldlabel", type: "string" },
     ]
   },
   {

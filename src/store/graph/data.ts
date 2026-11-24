@@ -1,6 +1,6 @@
 import { ContinuousGeneratorODE, DiscreteGenerator, System } from "@reside-ic/dust2";
 import { Fixed, ModelRunResult, PlotData, Range } from "../types";
-import { BarStyle, BarStyles, LineStyle, LineStyles, Params, ParamValue, ParamValues, Stroke, Styles } from "../../schemas/json/types";
+import { BarStyle, LineStyle, Params, ParamValue, ParamValues, Stroke, Styles } from "../../schemas/json/types";
 import { GraphHtmlMetadata } from "../../schemas/html/types";
 import { objMap } from "../../utils";
 import { supportedVariants } from "../../schemas/html/validate";

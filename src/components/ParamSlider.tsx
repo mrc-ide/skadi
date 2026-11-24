@@ -24,10 +24,6 @@ const ParamSlider: Component<ParamsProps> = props => {
             step={step || ((max - min) / 1000)}
             value={[store.params().user[props.par] as number]}
             onChange={setParamValue}>
-      <div class="SliderLabel">
-        <Slider.Label>{props.par}</Slider.Label>
-        <Slider.ValueLabel />
-      </div>
       <Slider.Track class="SliderTrack">
         <Slider.Fill class="SliderRange" />
         <Slider.Thumb class="SliderThumb">

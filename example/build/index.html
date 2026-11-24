@@ -34,13 +34,19 @@
          w-step="0.1"></div>
 
     <!-- Visual elements -->
-    <div class="w-par" w-store="basic" w-par="beta"></div>
-    <div class="w-par" w-store="basic" w-par="beta"></div>
-    <div class="w-par" w-store="basic" w-par="sigma"></div>
+    <span>The value of Beta is: </span><div class="w-parVal" w-store="basic" w-par="beta"></div>
+    <span>The min of Beta is: </span><div class="w-parMin" w-store="basic" w-par="beta"></div>
+    <div class="w-parSlider" w-store="basic" w-par="beta"></div>
+    <span>Copy with value <div class="w-parVal" w-store="basic" w-par="beta"></div></span>
+    <div class="w-parSlider" w-store="basic" w-par="beta"></div>
+    <span>Sigma val: </span><div class="w-parVal" w-store="basic" w-par="sigma"></div>
+    <div class="w-parSlider" w-store="basic" w-par="sigma"></div>
 
     <div class="w-form" w-store="basic" w-formid="f1" style="margin-top: 20px;"></div>
     <p>Some text in between</p>
     <div class="w-form" w-store="basic" w-formid="f2" style="margin-top: 20px;"></div>
+    <span>The value of country is </span>
+    <div class="w-fieldVal" w-store="basic" w-fieldlabel="Country"></div>
 
     <div class="graph-container">
       <div class="w-plot" data-w-type="ref" w-store="basic" w-id="1"></div>
@@ -68,7 +74,7 @@
          w-max="10"
          w-step="0.1"></div>
 
-    <div class="w-par" w-store="basic:1" w-par="beta"></div>
+    <div class="w-parSlider" w-store="basic:1" w-par="beta"></div>
 
     <div class="graph-container">
       <div class="w-plot" data-w-type="ref" w-store="basic:1" w-id="2"></div>
@@ -100,12 +106,12 @@
     <p>Change the intensity of beta</p>
     <div class="w-form" w-store="notbasic" w-formid="beta_intensity" style="margin-top: 20px;"></div>
 
-    <div class="w-par" style="margin-top: 20px;" w-store="notbasic" w-par="beta_fade"></div>
+    <div class="w-parSlider" style="margin-top: 20px;" w-store="notbasic" w-par="beta_fade"></div>
 
     <div class="graph-container">
       <div class="w-plot" data-w-type="ref" w-store="notbasic" w-id="2"></div>
       <div class="w-plot" data-w-type="diff" w-ylock w-store="notbasic" w-vars="s_1, s_2, s_3, s_4" w-yrange="-2000000,2000000" w-fixedid1="main" w-fixedid2="no_fade"></div>
-      <div class="w-plot" data-w-type="diff" w-ylock w-yrange="-2000000,2000000" w-store="notbasic" w-vars="s_1, s_2, s_3, s_4" w-variant="bar" w-fixedid1="main" w-fixedid2="no_fade"></div>
+      <div class="w-plot" data-w-type="cfg" w-ylock w-yrange="-2000000,2000000" w-store="notbasic" w-vars="s_1, s_2, s_3, s_4" w-variant="bar" w-fixedid="main"></div>
     </div>
 
 

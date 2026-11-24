@@ -7,17 +7,65 @@ import { PlotType } from "./schemas/html/schema";
 import { dataW, getAttr, getEls, w } from "./schemas/html/utils";
 import { supportedVariants } from "./schemas/html/validate";
 import Barchart from "./components/Barchart";
+import ParamValue from "./components/ParamValue";
+import ParamMin from "./components/ParamMin";
+import ParamMax from "./components/ParamMax";
+import FormValue from "./components/FormValue";
 
 type RenderFunc = (el: Element, getJsx: () => JSX.Element) => void
 
 export const renderParamSliderEls = (store: string, renderWithStore: RenderFunc) => {
-  const els = getEls("par", { store });
+  const els = getEls("parSlider", { store });
   return els.forEach(el => {
     const props = {
       store,
       par: getAttr("par", el)!
     };
     renderWithStore(el, () => <ParamSlider {...props}/>);
+  });
+}
+
+export const renderParamValueEls = (store: string, renderWithStore: RenderFunc) => {
+  const els = getEls("parVal", { store });
+  return els.forEach(el => {
+    const props = {
+      store,
+      par: getAttr("par", el)!
+    };
+    renderWithStore(el, () => <ParamValue {...props}/>);
+  });
+}
+
+export const renderParamMinEls = (store: string, renderWithStore: RenderFunc) => {
+  const els = getEls("parMin", { store });
+  return els.forEach(el => {
+    const props = {
+      store,
+      par: getAttr("par", el)!
+    };
+    renderWithStore(el, () => <ParamMin {...props}/>);
+  });
+}
+
+export const renderParamMaxEls = (store: string, renderWithStore: RenderFunc) => {
+  const els = getEls("parMax", { store });
+  return els.forEach(el => {
+    const props = {
+      store,
+      par: getAttr("par", el)!
+    };
+    renderWithStore(el, () => <ParamMax {...props}/>);
+  });
+}
+
+export const renderFieldValueEls = (store: string, renderWithStore: RenderFunc) => {
+  const els = getEls("fieldVal", { store });
+  return els.forEach(el => {
+    const props = {
+      store,
+      fieldLabel: getAttr("fieldlabel", el)!
+    };
+    renderWithStore(el, () => <FormValue {...props}/>);
   });
 }
 
