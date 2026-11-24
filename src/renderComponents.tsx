@@ -10,7 +10,7 @@ import Barchart from "./components/Barchart";
 import ParamValue from "./components/ParamValue";
 import ParamMin from "./components/ParamMin";
 import ParamMax from "./components/ParamMax";
-import FormValue from "./components/FormValue";
+import FieldValue from "./components/FieldValue";
 
 type RenderFunc = (el: Element, getJsx: () => JSX.Element) => void
 
@@ -65,7 +65,7 @@ export const renderFieldValueEls = (store: string, renderWithStore: RenderFunc) 
       store,
       fieldLabel: getAttr("fieldlabel", el)!
     };
-    renderWithStore(el, () => <FormValue {...props}/>);
+    renderWithStore(el, () => <FieldValue {...props}/>);
   });
 }
 
